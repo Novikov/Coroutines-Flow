@@ -1,4 +1,4 @@
-package Coroutines.task
+package coroutines.task
 
 import kotlinx.coroutines.*
 
