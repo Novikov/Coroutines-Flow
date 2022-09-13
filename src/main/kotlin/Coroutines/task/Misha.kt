@@ -1,7 +1,6 @@
-package Coroutines.other
+package Coroutines.task
 
 import kotlinx.coroutines.*
-import kotlin.coroutines.CoroutineContext
 
 fun main() {
     GlobalScope.launch {
