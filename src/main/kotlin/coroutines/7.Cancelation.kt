@@ -1,9 +1,11 @@
 package coroutines
 
 import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
 
 suspend fun main() {
-    coroutineCancellationExample()
+//    coroutineCancellationExample()
+//    blockingTest()
 }
 
 /**
@@ -70,7 +72,7 @@ suspend fun catchExternalCancellationInLaunch() = coroutineScope {
  * В этом случае обычно вызов метода await() помещается в блок try
  * */
 
-suspend fun catchExternalCancellationInAsync()= coroutineScope{
+suspend fun catchExternalCancellationInAsync() = coroutineScope {
 
     // создаем и запускаем корутину
     val message = async {
@@ -82,14 +84,13 @@ suspend fun catchExternalCancellationInAsync()= coroutineScope{
     try {
         // ожидаем получение результата
         println("message: ${message.await()}")
-    }
-    catch (e:CancellationException){
+    } catch (e: CancellationException) {
         println("Coroutine has been canceled")
     }
     println("Program has finished")
 }
 
-suspend fun getMessage2() : String{
+suspend fun getMessage2(): String {
     delay(500L)
     return "Hello"
 }
@@ -100,3 +101,39 @@ suspend fun getMessage2() : String{
  * Отмена рядового job не влияет на его siblings
  * */
 
+
+/**
+ * Корутины никак не блокируют друг друга.
+ * */
+private fun blockingTest() {
+    val scope = CoroutineScope(Job())
+    println("onRun, start")
+
+    scope.launch {
+        println("coroutine, start ${Thread.currentThread().name}")
+        TimeUnit.MILLISECONDS.sleep(1000)
+        println("coroutine, end ${Thread.currentThread().name}")
+    }
+
+    println("onRun, middle")
+
+    scope.launch {
+        println("coroutine2, start ${Thread.currentThread().name}")
+        TimeUnit.MILLISECONDS.sleep(1500)
+        println("coroutine2, end ${Thread.currentThread().name}")
+    }
+
+    println("onRun, end")
+}
+
+/**
+ * При вызове метода cancel по ссылке Job - мы не отменяем корутину, а меняем ее статус. Она продолжит выполняться.
+ * Для того, чтобы перестать выполнять работу через данную корутину необходимо отслеживать ее статус.
+ * Т.е пишется условие на проверку текущий scope isActive. Пример можно увидеть вот тут https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/602-urok-8-korutiny-otmena.html
+ * или в app модуле андройд проекта.
+ * */
+
+/**
+ * Так же можно сделать cancel по ссылке Scope. Тогда отменяться все дочерние job которые лежат внутри данного scope. В это случае
+ * Все корутины будут отменены. Проверять статус не придется.
+ * */
