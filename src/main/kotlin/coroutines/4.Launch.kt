@@ -61,3 +61,7 @@ suspend fun lazyLaunchExample() = coroutineScope{
     job.start() // запускаем корутину
     println("Other actions in main method")
 }
+
+/**
+ * Все тоже самое можно проделать с помощью async
+ * */
