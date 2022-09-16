@@ -15,7 +15,6 @@ suspend fun main() {
  * */
 
 suspend fun coroutineCancellationExample() = coroutineScope {
-
     val downloader: Job = launch {
         println("Начинаем загрузку файлов")
         for (i in 1..5) {
