@@ -8,7 +8,8 @@ import kotlinx.coroutines.launch
 suspend fun main() {
 //    nestedCoroutineExample()
 //    parentWaitChildExample()
-    parallelWorkExample()
+//    parallelWorkExample()
+    relationBetweenParentAndChild()
 }
 
 /*** Launch билдер создает свой внутренний scope.
@@ -85,3 +86,28 @@ suspend fun parallelWorkExample() = coroutineScope {
         println("parent coroutine, end")
     }
 }
+
+/** Родительская корутина выполнится первой, но будет иметь статус isActive = true до тех пор пока дочерние корутины выполняются.
+ * */
+suspend fun relationBetweenParentAndChild() = coroutineScope {
+    val job = launch {
+        println("parent start")
+        launch {
+            println("child start")
+            delay(1000)
+            println("child end")
+        }
+        println("parent end")
+    }
+
+    launch {
+        delay(500)
+        println("parent job is active: ${job.isActive}")
+        delay(1000)
+        println("parent job is active: ${job.isActive}")
+    }
+}
+
+/**
+ * Можно переопределять контекст дочерних корутин путем передачи других параметров.
+ * */
