@@ -1,12 +1,15 @@
 package coroutines
 
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
+import kotlin.coroutines.resume
+import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    withoutCoroutines()
-    withCoroutines()
+//    withCoroutines()
+    lostCoroutineExample()
 }
 
 suspend fun withoutCoroutines() {
@@ -53,3 +56,32 @@ println(i)
 Когда корутина приостанавливает свое выполнение, например, как в случае выше при вызове задержки с помощью функции delay(), эта корутина освобождает поток, в котором она выполнялась, и сохраняется в памяти. А освобожденный поток может быть зайдествован для других задач. А когда завершается запущенная задача (например, выполнение функции delay()), корутина возобновляет свою работу в одном из свободных потоков.
 
  * */
+
+
+/** Потерянная корутина
+ * Если нижестоящую функцию вызвать из другой suspend функции то она никогда не завершится
+ * */
+
+/**
+ * Если мы работаем с кодом, который выполняет асинхронные запросы - необходимо вызывать continuation.resume()
+ * иначе корутина не продолжит свое выполнение. */
+suspend fun getData2(): Int = suspendCoroutine {
+    println("suspend function, start")
+    thread {
+        println("suspend function, background work")
+        TimeUnit.MILLISECONDS.sleep(1000)
+//        it.resume(5)
+    }
+}
+
+suspend fun lostCoroutineExample() {
+    val scope = CoroutineScope(Dispatchers.Unconfined)
+
+    scope.launch() {
+        println("start coroutine ${Thread.currentThread().name}")
+        val data = getData2()
+        println("end coroutine ${Thread.currentThread().name}")
+    }
+
+    delay(2000)
+}
