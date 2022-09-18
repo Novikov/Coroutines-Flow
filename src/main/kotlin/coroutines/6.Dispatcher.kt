@@ -45,33 +45,39 @@ suspend fun setDispatcher() = coroutineScope() {
 
 
 /** Main dispatcher можно использовать для выполнения операций на главном потоке. Т.к suspend функции не блокируют поток то это не будет
- * тормозить UI. Если мы возовем continuation.resume - то все будет ок.
+ * тормозить UI.
  * Смены потока при завершении операции не будет т.к у Main диспатчера только один поток.
- * Код ниже не запустится т.к Main диспатчер есть только в Android.
+ * В идее Main диспатчер использовать не получится т.к это возможно только в андройде. Насколько я понимаю подключить зависимоть нельзя.
  * */
-private suspend fun getDataSafe(): String =
-    suspendCoroutine {
-        println("background work ${Thread.currentThread().name}")
-        TimeUnit.MILLISECONDS.sleep(3000)
-        it.resume("Data")
-    }
-//
-//suspend fun getDataOnMainExample(){
-//    val scope = CoroutineScope(Dispatchers.Main)
-//
-//    scope.launch {
-//        val data = getData()
-//        updateUI(data)
-//    }
-//}
 
+
+/**
+ * Unconfined dispatcher
+ * При старте корутины происходит проверка isDispatcherNeeded. Для корутин с использованием других диспатчеров этот папраметр установлен в
+ * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по сслыке
+ * DispatchedContinuation. В этом случае может проихойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
+ * вызова resume - поток на котором происходил запуск может быть занят и завершение проихойдет на другом потоке. В случае unconfined
+ * завершение будет происходить на том потоке, на котором выполнянась работа.
+ * */
 suspend fun getDataOnUnconfinedDispatcherExample() {
     val scope = CoroutineScope(Dispatchers.Unconfined)
 
     scope.launch() {
         println("start coroutine ${Thread.currentThread().name}")
-        val data = getData()
+        val data = getData3()
         println("end coroutine ${Thread.currentThread().name}")
     }
+
+    delay(3000)
 }
+
+private suspend fun getData3(): String =
+    suspendCoroutine {
+        println("suspend coroutine start ${Thread.currentThread().name}")
+        thread {
+            println("background work ${Thread.currentThread().name}")
+            TimeUnit.MILLISECONDS.sleep(1000)
+            it.resume("Data")
+        }
+    }
 
