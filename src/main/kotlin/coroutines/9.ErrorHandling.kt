@@ -3,63 +3,46 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-//    getNecessaryDataOuterTryCatch()
-//    getNecessaryDataInnerTryCatch()
-    runCatchingExample()
+//    example1()
+    example2()
 }
 
-suspend fun getFailingData(): Int {
-    delay(100)
-    throw RuntimeException("Request Failed")
-    return 5
-}
-
-suspend fun getData(): Int {
-    delay(100)
-    return 10
-}
-
-/**
- * Не отработает т.к исключение не пробросится, а передастся на вершину иерархии (Это называется structured concurrency)
+/** Исключение не обработается
+Билдер launch, используется чтобы создать и запустить корутину, и сам после этого сразу завершается.
+А корутина живет своей жизнью в отдельном потоке. Вот именно поэтому try-catch здесь и не срабатывает.
+Билдер launch формирует контекст, создает пару Continuation+Job, и отправляет Continuation диспетчеру, который помещает его в очередь.
+Ни в одном из этих шагов не было никакой ошибки, поэтому try-catch ничего не поймал.
+Билдер завершил свою работу, и метод onRun успешно завершился.
+У диспетчера есть свободный поток, который постоянно мониторит очередь.
+Он обнаруживает там Continuation и начинает его выполнение. И вот тут уже возникает NumberFormatException.
+Но наш try-catch до него никак не мог дотянуться. Т.к. он покрывал только создание и запуск корутины, но не выполнение корутины, т.к. выполнение ушло в отдельный поток.
  * */
-suspend fun getNecessaryDataOuterTryCatch(): Int = coroutineScope {
+private suspend fun example1() = coroutineScope {
+    println("onRun start")
     try {
-        val failingDataDeferred = async { getFailingData() }
-        val successDataDeferred = async { getData() }
-        failingDataDeferred.await().plus(successDataDeferred.await())
-    } catch (ex: Exception) {
-        10
-    }
-}
-
-/**
- * В данном случае отработает т.к исключение отлавливается внутри async
- * */
-suspend fun getNecessaryDataInnerTryCatch(): Int = coroutineScope {
-    val failingDataDeferred = async {
-        try {
-            getFailingData()
-        } catch (ex: java.lang.Exception) {
-            10
+        launch {
+            Integer.parseInt("a")
         }
+    } catch (e: Exception) {
+        println("error $e")
     }
-    val successDataDeferred = async { getData() }
-    failingDataDeferred.await().plus(successDataDeferred.await())
+
+    println("onRun end")
 }
 
-/**
- * В таком виде exception не отловится. Нужно убирать async.
- * Обработка ошибки через передачу в launch coroutineExceptionHandler будет работать только для viewModelScope. Нужно узнать почему.
- * Нужно помнить что установка обработчика в дочерней корутине работать не будет.
- * */
-suspend fun runCatchingExample() = coroutineScope {
+/** Тоже самое произойдет если мы поменяем launch на thread. Генерится другой код в котором происходит Exception.
+ * Поэтому try его не отловит*/
+
+/**Следующий код отловит исключение потому что мы оборачиваем в catch непосредственно в месте вызова.*/
+private suspend fun example2() = coroutineScope {
+    println("onRun start")
     launch {
-        kotlin.runCatching {
-            val failingDataDeferred = async { getFailingData() }
-            val successDataDeferred = async { getData() }
-            failingDataDeferred.await().plus(successDataDeferred.await())
+        try {
+            Integer.parseInt("a")
+        } catch (e: Exception) {
+            println("error $e")
         }
-            .onSuccess { println("Success") }
-            .onFailure { println("Failure") }
     }
+    println("onRun end")
 }
+
