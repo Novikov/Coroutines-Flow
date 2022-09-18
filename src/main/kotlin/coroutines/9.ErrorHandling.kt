@@ -6,7 +6,8 @@ import java.util.concurrent.TimeUnit
 suspend fun main() {
 //    errorHandlingExample1()
 //    errorHandlingExample2()
-    errorHandlingExample4()
+//    errorHandlingExample4()
+    errorHandlingExample5()
 }
 
 /** Исключение не обработается
@@ -86,6 +87,29 @@ suspend fun errorHandlingExample4() = coroutineScope {
     }
 
     launch {
+        repeat(5) {
+            TimeUnit.MILLISECONDS.sleep(300)
+            println("second coroutine isActive ${isActive}")
+        }
+    }
+}
+
+/**
+ * Разные scope никак не связаны между собой.
+ * */
+suspend fun errorHandlingExample5() = coroutineScope {
+    val handler = CoroutineExceptionHandler { context, exception ->
+        println("first coroutine exception $exception")
+    }
+
+    val scope = CoroutineScope(Dispatchers.Default)
+
+    launch(handler) {
+        TimeUnit.MILLISECONDS.sleep(1000)
+        Integer.parseInt("a")
+    }
+
+    scope.launch {
         repeat(5) {
             TimeUnit.MILLISECONDS.sleep(300)
             println("second coroutine isActive ${isActive}")
