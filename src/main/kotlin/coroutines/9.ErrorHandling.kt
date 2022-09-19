@@ -7,7 +7,8 @@ suspend fun main() {
 //    errorHandlingExample1()
 //    errorHandlingExample2()
 //    errorHandlingExample4()
-    errorHandlingExample5()
+//    errorHandlingExample5()
+    errorHandlingExample6()
 }
 
 /** Исключение не обработается
@@ -95,16 +96,47 @@ suspend fun errorHandlingExample4() = coroutineScope {
 }
 
 /**
- * Разные scope никак не связаны между собой.
+ * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
+ * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
  * */
-suspend fun errorHandlingExample5() = coroutineScope {
+suspend fun errorHandlingExample5() {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
 
-    val scope = CoroutineScope(Dispatchers.Default)
+    val scope1 = CoroutineScope(Dispatchers.Default)
+    val scope2 = CoroutineScope(Dispatchers.Default)
 
-    launch(handler) {
+    scope1.launch(handler) {
+        TimeUnit.MILLISECONDS.sleep(1000)
+        Integer.parseInt("a")
+    }
+
+    scope2.launch {
+        repeat(5) {
+            TimeUnit.MILLISECONDS.sleep(300)
+            println("second coroutine isActive ${isActive}")
+        }
+    }
+
+    delay(10000)
+}
+
+/**
+ * Supervisor job
+ * В примерах с CoroutineExceptionHandler мы убедились, что scope отменяет своих детей, когда в одном из них происходит ошибка.
+ * Пусть даже эта ошибка и была передана в обработчик. Такое поведение родителя далеко не всегда может быть удобным. Поэтому у нас есть возможность это отключить.
+ * Для этого надо в scope вместо обычного Job() использовать SupervisorJob(). Он отличается от Job() тем, что не отменяет всех своих детей при возникновении ошибки в одном из них.
+ * */
+
+suspend fun errorHandlingExample6() {
+    val handler = CoroutineExceptionHandler { context, exception ->
+        println("first coroutine exception $exception")
+    }
+
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + handler)
+
+    scope.launch() {
         TimeUnit.MILLISECONDS.sleep(1000)
         Integer.parseInt("a")
     }
@@ -115,4 +147,6 @@ suspend fun errorHandlingExample5() = coroutineScope {
             println("second coroutine isActive ${isActive}")
         }
     }
+
+    delay(10000)
 }
