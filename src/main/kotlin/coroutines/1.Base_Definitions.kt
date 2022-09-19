@@ -85,3 +85,10 @@ suspend fun lostCoroutineExample() {
 
     delay(2000)
 }
+
+/**
+ * Существует 2 типа suspend функций: обычные и отменяемые.
+ * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
+ * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
+ * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
+ * */
