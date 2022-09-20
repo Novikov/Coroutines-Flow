@@ -5,7 +5,6 @@ import kotlinx.coroutines.channels.produce
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.flow.internal.ChannelFlow
 import kotlinx.coroutines.launch
 
 suspend fun main() {
