@@ -1,16 +1,15 @@
 package Flow
 
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
+import java.io.IOException
 
 suspend fun main() {
 //    handleErrorExample1()
 //    handleErrorExample2()
-    handleErrorExample3()
+//    handleErrorExample3()
 //    handleErrorExample4()
+    handleErrorExample5()
 }
 
 suspend fun getErrorFlow(): Flow<String> {
@@ -62,6 +61,7 @@ suspend fun handleErrorExample3() {
 }
 
 /**
+ * Catch срабатывает только для предшествующих ему операторов.
  * Можно добавить несколько операторов catch. Один будет ловить исключения из flow, другой из map, но из map у меня не отрабатывает.
  * */
 
@@ -73,4 +73,45 @@ suspend fun handleErrorExample4() {
         .collect {
             println(it)
         }
+}
+
+/**
+ * Retry
+ * Перезапустит Flow в случае ошибки. Так же как и catch сработает только для операторов выше.
+ * */
+
+suspend fun handleErrorExample5() {
+    getErrorFlow()
+        .retry(2)
+        .collect {
+            println(it)
+        }
+}
+
+/**
+ * Можно добавить дополнительную логику для добавления паузы дальнейшего повтора.
+ * */
+suspend fun handleErrorExample6() {
+    getErrorFlow()
+        .retry(2) {
+            if (it is IOException) {
+                delay(5000)
+                true
+            }
+            false
+        }
+        .collect {
+            println(it)
+        }
+}
+
+/**
+ * В этот оператор не передается количество повторов. Вместо этого условие повтора. Если - true перезапускаем flow{}
+ * */
+suspend fun handleErrorExample7() {
+    getErrorFlow()
+        .retryWhen { cause, attempt ->
+            cause is IOException && attempt < 5
+        }
+        .collect()
 }
