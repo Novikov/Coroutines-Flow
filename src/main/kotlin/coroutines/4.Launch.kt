@@ -3,6 +3,8 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
+//    launchExample()
+//    joinLaunchExample()
     lazyLaunchExample()
 }
 
@@ -25,7 +27,7 @@ suspend fun launchExample() = coroutineScope {
 }
 
 /**
- * launch билдер возвращает объект job. Вызов join() по ссылке job заставит подождать выполенения блока кода внутри launch
+ * launch билдер возвращает объект job. Вызов join() по ссылке job заставит подождать выполенения блока кода внутри launch для всего что ниже join()
  * */
 
 suspend fun joinLaunchExample() = coroutineScope {
@@ -49,7 +51,7 @@ suspend fun joinLaunchExample() = coroutineScope {
  * Для установки отложенного запуска в функцию launch() передается значение start = CoroutineStart.LAZY
  * */
 
-suspend fun lazyLaunchExample() = coroutineScope{
+suspend fun lazyLaunchExample() = coroutineScope {
 
     // корутина создана, но не запущена
     val job = launch(start = CoroutineStart.LAZY) {
