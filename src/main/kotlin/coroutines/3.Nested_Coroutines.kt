@@ -38,7 +38,8 @@ suspend fun nestedCoroutineExample() = coroutineScope {
 
  * Корутина может выполняться в main потоке.
 
- * Выше рассмотренный пример станет выглядеть гораздо более осмысленным и полезным, если код родительской корутины выполняется в main потоке, а код дочерней - в фоновом. Получается, что из main потока мы запустили фоновую работу и подождали ее окончания без каких-либо блокировок и колбэков.
+ * Выше рассмотренный пример станет выглядеть гораздо более осмысленным и полезным, если код родительской корутины выполняется в main потоке,
+ * а код дочерней - в фоновом. Получается, что из main потока мы запустили фоновую работу и подождали ее окончания без каких-либо блокировок и колбэков.
  * join не заблокирует main поток, а только приостановит
  * */
 suspend fun parentWaitChildExample() = coroutineScope {
@@ -59,8 +60,8 @@ suspend fun parentWaitChildExample() = coroutineScope {
 }
 
 /**
- * Если возникает вопрос, почему то же самое нельзя без родительской корутины провернуть, то вспомните, что join - это suspend функция.
- * Она не может быть вызвана вне корутины.
+ * Если возникает вопрос, почему то же самое нельзя без родительской корутины провернуть, то вспомните, что join - это suspend функция, которая не
+ * может быть вызвана вне scope
  * */
 
 /**
@@ -69,6 +70,7 @@ suspend fun parentWaitChildExample() = coroutineScope {
  * */
 suspend fun parallelWorkExample() = coroutineScope {
     launch {
+        val begin = System.currentTimeMillis()
         println("parent coroutine, start")
 
         val job = launch {
@@ -83,7 +85,11 @@ suspend fun parallelWorkExample() = coroutineScope {
         job.join()
         job2.join()
 
+        val end = System.currentTimeMillis()
+
         println("parent coroutine, end")
+
+        println("Elapsed time in miliseconds: ${end-begin}")
     }
 }
 
