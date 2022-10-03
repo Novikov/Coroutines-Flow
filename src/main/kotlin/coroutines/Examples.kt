@@ -1,10 +1,10 @@
-package coroutines.task
+package coroutines
 
 import kotlinx.coroutines.*
 
 suspend fun main() {
-    example1()
-//    example2()
+//    example1()
+    example2()
 }
 
 /**
@@ -17,7 +17,6 @@ suspend fun example1() = coroutineScope {
     launch {
         println("start")
         launch {
-            delay(1000)
             println("a")
         }
         launch { println("b") }
