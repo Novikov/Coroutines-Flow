@@ -4,12 +4,12 @@ import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 suspend fun main() {
-//    errorHandlingExample1()
+    errorHandlingExample1()
 //    errorHandlingExample2()
 //    errorHandlingExample4()
 //    errorHandlingExample5()
 //    errorHandlingExample6()
-    errorHandlingExample7()
+//    errorHandlingExample7()
 }
 
 /** Исключение не обработается
