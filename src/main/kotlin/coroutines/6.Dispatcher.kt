@@ -8,8 +8,8 @@ import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    checkThread()
-//    setDispatcher()
-    getDataOnUnconfinedDispatcherExample()
+    setDispatcher()
+//    getDataOnUnconfinedDispatcherExample()
 }
 
 
@@ -27,7 +27,7 @@ suspend fun checkThread() = coroutineScope {
 /**
  * Мы сами можем задать диспатчер передав его в билдер
  * */
-suspend fun setDispatcher() = coroutineScope() {
+suspend fun setDispatcher() = coroutineScope {
     launch(Dispatchers.Default) {   // явным образом определяем диспетчер Dispatcher.Default
         println("Корутина выполняется на потоке: ${Thread.currentThread().name}")
     }
@@ -54,7 +54,7 @@ suspend fun setDispatcher() = coroutineScope() {
 /**
  * Unconfined dispatcher
  * При старте корутины происходит проверка isDispatcherNeeded. Для корутин с использованием других диспатчеров этот папраметр установлен в
- * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по сслыке
+ * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по ссылыке
  * DispatchedContinuation. В этом случае может проихойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
  * вызова resume - поток на котором происходил запуск может быть занят и завершение проихойдет на другом потоке. В случае unconfined
  * завершение будет происходить на том потоке, на котором выполнянась работа.
