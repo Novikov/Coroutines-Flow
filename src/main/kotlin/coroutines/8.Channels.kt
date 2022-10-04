@@ -5,7 +5,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 suspend fun main() {
-    closingChannelExample()
+    simpleChannel()
+//    closingChannelExample()
 }
 
 suspend fun simpleChannel() = coroutineScope {
