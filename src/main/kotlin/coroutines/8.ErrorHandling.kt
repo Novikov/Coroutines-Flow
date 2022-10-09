@@ -6,10 +6,10 @@ import java.util.concurrent.TimeUnit
 suspend fun main() {
 //    errorHandlingExample1()
 //    errorHandlingExample2()
-    errorHandlingExample3()
+//    errorHandlingExample3()
 //    errorHandlingExample4()
 //    errorHandlingExample5()
-//    errorHandlingExample6()
+    errorHandlingExample6()
 //    errorHandlingExample7()
 }
 
@@ -73,12 +73,6 @@ private suspend fun errorHandlingExample3() = coroutineScope {
     println("onRun start")
     launch(handler) {
         Integer.parseInt("a")
-
-//        try {
-//            Integer.parseInt("a")
-//        } catch (e: Exception) {
-//            println("error $e")
-//        }
     }
     println("onRun end")
 }
@@ -116,13 +110,13 @@ suspend fun errorHandlingExample5() {
     val scope2 = CoroutineScope(Dispatchers.Default)
 
     scope1.launch(handler) {
-        TimeUnit.MILLISECONDS.sleep(1000)
+        delay(1000)
         Integer.parseInt("a")
     }
 
     scope2.launch {
         repeat(5) {
-            TimeUnit.MILLISECONDS.sleep(300)
+            delay(300)
             println("second coroutine isActive ${isActive}")
         }
     }
