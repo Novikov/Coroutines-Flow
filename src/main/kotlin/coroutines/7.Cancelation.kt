@@ -4,24 +4,28 @@ import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 suspend fun main() {
-//    coroutineCancellationExample()
+    coroutineCancellationExample()
 //    catchExternalCancellationInLaunch()
-    blockingTest()
+//    blockingTest()
 }
 
 /**
- * При работе приложения может сложиться необходимость отменить выполнение корутины.
- * Например, в мобильном приложении запущена корутина для загрузки данных с некоторого интернет-ресуса,
- * но пользователь решил перейти к другой странице приложения, и ему больше не нужны эти данные.
- * В этом случае чтобы зря не тратить ресурсу системы, мы можем предусмотреть отмену выполнения корутины.
+ * Есть 2 варианта отмены корутины:
+ * 1.Через job. Отменится моментально если внутри есть suspend функция. Например delay. Если вместо нее TimeUnit.MILLISECONDS.sleep(1000) -
+ * отена не произойдет. В это случае поменяется только статус у coroutineScope. Чтобы работа внутри launch не выполнялась -
+ * необходимо вручную проверять статус coroutineScope.
+ * 2.Через scope. В этом случае произойдет моментальая отмена.
  * */
 
 suspend fun coroutineCancellationExample() = coroutineScope {
     val downloader: Job = launch {
         println("Начинаем загрузку файлов")
         for (i in 1..5) {
-            println("Загружен файл $i")
-            delay(500L)
+            if (isActive) {
+                println("Загружен файл $i")
+                TimeUnit.MILLISECONDS.sleep(1000)
+            }
+//            delay(500L)
         }
     }
     delay(800L)     // установим задержку, чтобы несколько файлов загрузились
