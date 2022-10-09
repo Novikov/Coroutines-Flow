@@ -5,7 +5,8 @@ import java.util.concurrent.TimeUnit
 
 suspend fun main() {
 //    errorHandlingExample1()
-    errorHandlingExample2()
+//    errorHandlingExample2()
+    errorHandlingExample3()
 //    errorHandlingExample4()
 //    errorHandlingExample5()
 //    errorHandlingExample6()
@@ -59,6 +60,10 @@ private suspend fun errorHandlingExample2() = coroutineScope {
  * Для этого он проверяет свой контекст, есть ли там объект CoroutineExceptionHandler.
  * Если Job находит этот объект, он передает ему исключение и крэша не будет.
  * Если же такого объекта в контексте не было, то Job отправит исключение в глобальный обработчик ошибок, который завершит работу приложения с крэшем.
+ *
+ * Код ниже не перехватит Exception потому что coroutine exception handler установлен в дочерний cope. Для того, чтобы это заработало - нужно создать
+ * scope и передать coroutine Exception handler в конструктор вторым параметром, после Job(). В таком случае это будет работать.
+ * Все это очень хорошо расписано вот тут https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
  * */
 private suspend fun errorHandlingExample3() = coroutineScope {
     val handler = CoroutineExceptionHandler { context, exception ->
@@ -67,11 +72,13 @@ private suspend fun errorHandlingExample3() = coroutineScope {
 
     println("onRun start")
     launch(handler) {
-        try {
-            Integer.parseInt("a")
-        } catch (e: Exception) {
-            println("error $e")
-        }
+        Integer.parseInt("a")
+
+//        try {
+//            Integer.parseInt("a")
+//        } catch (e: Exception) {
+//            println("error $e")
+//        }
     }
     println("onRun end")
 }
