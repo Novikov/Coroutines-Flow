@@ -6,10 +6,10 @@ import java.util.concurrent.TimeUnit
 suspend fun main() {
 //    errorHandlingExample1()
 //    errorHandlingExample2()
-//    errorHandlingExample3()
+    errorHandlingExample3()
 //    errorHandlingExample4()
 //    errorHandlingExample5()
-    errorHandlingExample6()
+//    errorHandlingExample6()
 //    errorHandlingExample7()
 }
 
@@ -72,7 +72,9 @@ private suspend fun errorHandlingExample3() = coroutineScope {
 
     println("onRun start")
     launch(handler) {
-        Integer.parseInt("a")
+        launch {
+            Integer.parseInt("a")
+        }
     }
     println("onRun end")
 }
