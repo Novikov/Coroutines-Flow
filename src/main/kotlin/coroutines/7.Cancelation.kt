@@ -27,7 +27,7 @@ suspend fun coroutineCancellationExample() = coroutineScope {
     val downloader: Job = launch {
         println("Начинаем загрузку файлов")
         for (i in 1..10) {
-            if (isActive){
+            if (isActive){ //другой способ вызвать yield() вместо условия
                 println("Загружен файл $i ${coroutineContext[ContinuationInterceptor]}")
                 TimeUnit.MILLISECONDS.sleep(1000) //поменять на delay(1000)
             }
@@ -39,6 +39,11 @@ suspend fun coroutineCancellationExample() = coroutineScope {
     downloader.join()      // ожидаем завершения корутины (в данном случае эта строчка кода никак не повлияет на результата потому что операция не ресурсозатратная)
     println("Работа программы завершена")
 }
+
+/**
+ * CancelAndJoin() нужен для того чтобы подождать пока завершится корутина. В офф доке есть пример где эта строчка кода заставляет ждать пока выполнится
+ * finaly блок у try-catch. https://kotlinlang.org/docs/cancellation-and-timeouts.html#closing-resources-with-finally
+ * */
 
 /**
  * Методы cancel() и join() можно заменить одним методом - cancelAndJoin()
@@ -75,7 +80,9 @@ suspend fun catchExternalCancellationInLaunch() = coroutineScope {
 }
 
 /**
- * Выше как раз то о чем говорил Миша. Прерывание корутины можно обработать внутри билдера с помощью оборота кода корутины в try-catch
+ * Если в примере выше в блоке finally вызвать какую cancelable функцию - например delay - она вызовет cancelable exception внутри finally.
+ * Из-за этого может не выполнится некоторая работа которую мы ожидаем. Чтобы этого не произошло можно обернуть выполняемый внутри finaly код
+ * withContext(NonCancellable)
  * */
 
 /**
