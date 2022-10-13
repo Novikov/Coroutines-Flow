@@ -4,122 +4,8 @@ import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 suspend fun main() {
-//    errorHandlingExample1()
-//    errorHandlingExample1_1()
-//    errorHandlingExample2()
-    errorHandlingExample3()
-//    errorHandlingExample4()
-//    errorHandlingExample5()
 //    errorHandlingExample6()
-}
-
-/** Исключение не обработается
-Билдер launch, используется чтобы создать и запустить корутину, и сам после этого сразу завершается.
-А корутина живет своей жизнью в отдельном потоке. Вот именно поэтому try-catch здесь и не срабатывает.
-Билдер launch формирует контекст, создает пару Continuation+Job, и отправляет Continuation диспетчеру, который помещает его в очередь.
-Ни в одном из этих шагов не было никакой ошибки, поэтому try-catch ничего не поймал.
-Билдер завершил свою работу, и метод onRun успешно завершился.
-У диспетчера есть свободный поток, который постоянно мониторит очередь.
-Он обнаруживает там Continuation и начинает его выполнение. И вот тут уже возникает NumberFormatException.
-Но наш try-catch до него никак не мог дотянуться. Т.к. он покрывал только создание и запуск корутины, но не выполнение корутины, т.к. выполнение ушло в отдельный поток.
- * */
-private suspend fun errorHandlingExample1() = coroutineScope {
-    println("onRun start")
-    try {
-        launch {
-            Integer.parseInt("a")
-        }
-    } catch (e: Exception) {
-        println("error $e")
-    }
-
-    println("onRun end")
-}
-
-/** Тоже самое произойдет если мы поменяем launch на thread. Генерится другой код в котором происходит Exception.
- * Поэтому try его не отловит*/
-
-/**Следующий код отловит исключение потому что мы оборачиваем в catch непосредственно в месте вызова.*/
-private suspend fun errorHandlingExample1_1() = coroutineScope {
-    println("onRun start")
-    launch {
-        try {
-            Integer.parseInt("a")
-        } catch (e: Exception) {
-            println("error $e")
-        }
-    }
-    println("onRun end")
-}
-
-/**
- * CoroutineExceptionHandler
- *
- * Код ниже не перехватит Exception потому что coroutine exception handler установлен в дочерний scope. Для того, чтобы это заработало - нужно создать
- * scope и передать coroutine Exception handler в конструктор вторым параметром, после Job(),  но через + а не через запятую.
- * В таком случае это будет работать.
- * Все это очень хорошо расписано вот тут https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
- * */
-
-/**
- * ^ Важный момент. Даже если мы создадим coroutineExceptionHandler - при возникновении ошибки всеровно отменятся все дочерние корутины.*/
-private suspend fun errorHandlingExample2() = coroutineScope {
-    val handler = CoroutineExceptionHandler { context, exception ->
-        println("handled $exception")
-    }
-
-    println("onRun start")
-    launch(handler) {
-        Integer.parseInt("a")
-    }
-    println("onRun end")
-}
-
-/**
- * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
- * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
- * */
-suspend fun errorHandlingExample3() = coroutineScope {
-    val handler = CoroutineExceptionHandler { context, exception ->
-        println("first coroutine exception $exception")
-    }
-
-    launch(handler) {
-        TimeUnit.MILLISECONDS.sleep(300)
-        Integer.parseInt("a")
-    }
-
-    launch {
-        repeat(5) {
-            TimeUnit.MILLISECONDS.sleep(300)
-            println("second coroutine isActive ${isActive}")
-        }
-    }
-
-    delay(5000)
-}
-
-suspend fun errorHandlingExample4() {
-    val handler = CoroutineExceptionHandler { context, exception ->
-        println("first coroutine exception $exception")
-    }
-
-    val scope1 = CoroutineScope(Dispatchers.Default)
-    val scope2 = CoroutineScope(Dispatchers.Default)
-
-    scope1.launch(handler) {
-        delay(1000)
-        Integer.parseInt("a")
-    }
-
-    scope2.launch {
-        repeat(5) {
-            delay(300)
-            println("second coroutine isActive ${isActive}")
-        }
-    }
-
-    delay(10000)
+//    errorHandlingExample7()
 }
 
 /**
@@ -129,7 +15,7 @@ suspend fun errorHandlingExample4() {
  * Для этого надо в scope вместо обычного Job() использовать SupervisorJob(). Он отличается от Job() тем, что не отменяет всех своих детей при возникновении ошибки в одном из них.
  * */
 
-suspend fun errorHandlingExample5() {
+suspend fun errorHandlingExample6() {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
@@ -166,7 +52,7 @@ suspend fun errorHandlingExample5() {
  * Потому что только она получит от своего родителя отрицательный ответ и попытается обработать ошибку сама.
  * Остальные корутины просто передают ошибку родительской корутине и сами ничего с ней делают
  * */
-suspend fun errorHandlingExample6() {
+suspend fun errorHandlingExample7() {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("$exception was handled in Coroutine_${context[CoroutineName]?.name}")
     }

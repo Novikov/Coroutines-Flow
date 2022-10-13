@@ -1,15 +1,15 @@
 package coroutines
 
 import kotlinx.coroutines.*
+import java.util.concurrent.TimeUnit
 
 suspend fun main() {
 //    errorExample1()
 //    errorExample1_1()
-//    errorExample1_2()
-//    errorExample2()
+    errorExample2()
 //    errorExample2_1()
 //    errorExample4()
-    errorExample4_1()
+//    errorExample4_1()
 }
 
 /**
@@ -143,6 +143,10 @@ suspend fun errorExample4() = coroutineScope {
  * Поведение для child async
  * 1)Если async является дочерним билдером то для выброса исключения не требуется вызывать await().
  * 2)В это случае исключение придет в coroutineExceptionHandler
+ *
+ * Вывод:
+ * 1)Вызов launch всегда приведет к попаданию exception в coroutineExceptionHandler не зависимо от того этот launch child или parent.
+ * 2)У launch отсутствует await() метод поэтому всегда try-catch всегда используем внутри launch, оборачивая код корутины
  * */
 suspend fun errorExample4_1() = coroutineScope {
     val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
@@ -156,4 +160,32 @@ suspend fun errorExample4_1() = coroutineScope {
         }
     }
     Thread.sleep(100)
+}
+
+/**
+ * #5 CoroutineScope
+ * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
+ * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
+ * */
+suspend fun errorHandlingExample5() = coroutineScope {
+    val handler = CoroutineExceptionHandler { context, exception ->
+        println("first coroutine exception $exception")
+    }
+
+    val scope1 = CoroutineScope(Job() + handler)
+    val scope2 = CoroutineScope(Job())
+
+    scope1.launch(handler) {
+        TimeUnit.MILLISECONDS.sleep(300)
+        Integer.parseInt("a")
+    }
+
+    scope2.launch {
+        repeat(5) {
+            TimeUnit.MILLISECONDS.sleep(300)
+            println("second coroutine isActive ${isActive}")
+        }
+    }
+
+    delay(5000)
 }
