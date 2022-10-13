@@ -4,85 +4,191 @@ import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 suspend fun main() {
-//    errorHandlingExample6()
-//    errorHandlingExample7()
+//    errorExample1()
+//    errorExample1_1()
+//    errorExample2()
+//    errorExample2_1()
+//    errorExample4()
+//    errorExample4_1()
+//    errorExample5()
+//    errorExample5_1()
+//    errorExample5_2()
+//    errorExample5_3()
+    errorExample5_4()
 }
 
 /**
- * Supervisor job
- * В примерах с CoroutineExceptionHandler мы убедились, что scope отменяет своих детей, когда в одном из них происходит ошибка.
- * Пусть даже эта ошибка и была передана в обработчик. Такое поведение родителя далеко не всегда может быть удобным. Поэтому у нас есть возможность это отключить.
- * Для этого надо в scope вместо обычного Job() использовать SupervisorJob(). Он отличается от Job() тем, что не отменяет всех своих детей при возникновении ошибки в одном из них.
+ * Лучшее объяснение обработки ошибок можно посмотреть здесь https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
  * */
 
-suspend fun errorHandlingExample6() {
+/** #1 try catch
+ * try-catch не отработает за пределами launch из-за особенностей structured concurrency
+ * */
+suspend fun errorExample1() = coroutineScope {
+    println("onRun start")
+    try {
+        launch {
+            Integer.parseInt("a")
+        }
+    } catch (e: Exception) {
+        println("error $e")
+    }
+
+    println("onRun end")
+}
+
+
+/** errorExample1_1
+ * try-catch отработает т.к он сработает в месте выброса exception
+ * */
+suspend fun errorExample1_1() = coroutineScope {
+    println("onRun start")
+    launch {
+        try {
+            Integer.parseInt("a")
+        } catch (e: Exception) {
+            println("error $e")
+        }
+    }
+    println("onRun end")
+}
+
+/**
+ * #2 Coroutine Exception Handler
+ *
+ * Example2
+ * Отработает в двух случаях:
+ * 1)Если coroutineExceptionHandler установлен в scope на котором происходит вызов билдера корутины
+ * */
+
+suspend fun errorExample2() {
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
+        println("Handle $exception in CoroutineExceptionHandler")
+    }
+
+    val topLevelScope = CoroutineScope(Job() + coroutineExceptionHandler)
+
+    topLevelScope.launch {
+        launch {
+            throw RuntimeException("RuntimeException in nested coroutine")
+        }
+    }
+
+    Thread.sleep(100)
+}
+
+/**
+ * 2)Если handler передан в parent coroutine builder. Если мы передадим его в дочернюю корутину - обработка exception не произойдет.
+ * */
+suspend fun errorExample2_1() {
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
+        println("Handle $exception in CoroutineExceptionHandler")
+    }
+
+    val topLevelScope = CoroutineScope(Job())
+
+    topLevelScope.launch(coroutineExceptionHandler) {
+        launch {
+            Integer.parseInt("a")
+        }
+    }
+
+    Thread.sleep(100)
+}
+
+/**
+ * #3 try-catch vs coroutine exception handler
+ * “CoroutineExceptionHandler is a last-resort mechanism for global “catch all” behavior.
+ * You cannot recover from the exception in the CoroutineExceptionHandler.The coroutine had already completed with the corresponding exception when the handler is called.
+ * Normally, the handler is used to log the exception, show some kind of error message, terminate, and/or restart the application
+ *
+ * Use try/catch if you want to retry the operation or do other actions before the Coroutine completes.
+ * Keep in mind that by catching the exception directly in the Coroutine, it isn’t propagated up the job hierarchy and you aren’t making use of the cancellation functionality of Structured Concurrency.
+ * Use the CoroutineExceptionHandler for logic that should happen after the coroutine already completed.
+ * */
+
+
+/**
+ * #4 Async
+ *
+ *
+ * */
+
+/** errorExample4
+ * Async требует иного способа работы с try-catch.
+ *
+ * Поведение для top level async
+ * 1)Если мы вызываем async на созданном scope то exception выбросится только при вызове await()
+ * 2)Если мы передадим coroutine exception handler то exception всеровно туда не придет. В example4_1 показано как отправить exception
+ * в coroutineExceptionHandler
+ *
+ * */
+suspend fun errorExample4() = coroutineScope {
+
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
+        println("Handle $exception in CoroutineExceptionHandler")
+    }
+
+    val topLevelScope = CoroutineScope(Job() + coroutineExceptionHandler)
+
+    val deferredResult = topLevelScope.async {
+        throw RuntimeException("RuntimeException in async coroutine")
+    }
+
+    try {
+        deferredResult.await()
+    } catch (exception: Exception) {
+        println("Handle $exception in try/catch")
+    }
+
+    delay(100)
+}
+
+/**
+ * Поведение для child async
+ * 1)Если async является дочерним билдером то для выброса исключения не требуется вызывать await().
+ * 2)В это случае исключение придет в coroutineExceptionHandler
+ *
+ * Вывод:
+ * 1)Вызов launch всегда приведет к попаданию exception в coroutineExceptionHandler не зависимо от того этот launch child или parent.
+ * 2)У launch отсутствует await() метод поэтому всегда try-catch всегда используем внутри launch, оборачивая код корутины
+ * */
+suspend fun errorExample4_1() = coroutineScope {
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
+        println("Handle $exception in CoroutineExceptionHandler")
+    }
+
+    val topLevelScope = CoroutineScope(Job() + coroutineExceptionHandler)
+    topLevelScope.launch {
+        async {
+            throw RuntimeException("RuntimeException in async coroutine")
+        }
+    }
+    Thread.sleep(100)
+}
+
+/**
+ * #5 Scope
+ * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
+ * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
+ * */
+suspend fun errorExample5() = coroutineScope {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
 
-    val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default + handler)
+    val scope1 = CoroutineScope(Job() + handler)
+    val scope2 = CoroutineScope(Job())
 
-    scope.launch() {
-        TimeUnit.MILLISECONDS.sleep(1000)
+    scope1.launch(handler) {
+        TimeUnit.MILLISECONDS.sleep(300)
         Integer.parseInt("a")
     }
 
-    scope.launch {
+    scope2.launch {
         repeat(5) {
             TimeUnit.MILLISECONDS.sleep(300)
             println("second coroutine isActive ${isActive}")
-        }
-    }
-
-    delay(10000)
-}
-
-/**
- * Обработка исключений во вложенных корутинах.
- * 1. Если обернуть место выброса исключения в try внутри launch как в прошлом уроке - то поведение не изменится.
- * 2. Отличие возникает при передаче ошибки родителю.
- * Если родитель - scope то ошибка передается в coroutine exception handler. Если такого обработчика нет, то ошибка передастся в глобальный обработчик.
- * Если родитель корутина то ошибка передается ему. Текущая корутна спрашивает сможет ли родитель обработать. Если родитель так же корутина, то
- * ошибка уходит вверх по иерархии. Таким образом эта ошибка поднимается наверх по иерархии вложенных корутин, пока не достигнет самой верхней корутины.
- * Ее родитель - это скоуп. Когда самая верхняя корутина спросит его, он скажет, что ошибку обработать не сможет (Если нет обработчика).
- * */
-
-/**
- * Из объяснений выше следует, что обработчик CoroutineExceptionHandler сработает только в самой верхней корутине.
- * Потому что только она получит от своего родителя отрицательный ответ и попытается обработать ошибку сама.
- * Остальные корутины просто передают ошибку родительской корутине и сами ничего с ней делают
- * */
-suspend fun errorHandlingExample7() {
-    val handler = CoroutineExceptionHandler { context, exception ->
-        println("$exception was handled in Coroutine_${context[CoroutineName]?.name}")
-    }
-
-    val scope = CoroutineScope(Job() + Dispatchers.IO + handler)
-
-    scope.launch(CoroutineName("1")) {
-
-        launch(CoroutineName("1_1")) {
-            repeatIsActive()
-            TimeUnit.MILLISECONDS.sleep(500)
-            Integer.parseInt("a")
-        }
-
-        launch(CoroutineName("1_2")) {
-            TimeUnit.MILLISECONDS.sleep(1000)
-            repeatIsActive()
-        }
-    }
-
-    scope.launch(CoroutineName("2")) {
-
-        launch(CoroutineName("2_1")) {
-            TimeUnit.MILLISECONDS.sleep(1000)
-            repeatIsActive()
-        }
-
-        launch(CoroutineName("2_2")) {
-            TimeUnit.MILLISECONDS.sleep(1000)
-            repeatIsActive()
         }
     }
 
@@ -90,34 +196,105 @@ suspend fun errorHandlingExample7() {
 }
 
 /**
- *  Ниже расширение для того чтоб наглядно убедиться в том, что ошибка по пути наверх отменит все другие корутины
+ * CoroutineScope
+ * Try-Catch не должен перехватывать exception если он расположен над coroutine билдером, но в случае с coroutine scope это правило н работает.
+ * Coroutine scope повтороно генерирует исключение своих дочерних элементов вместо того, чтобы прокидывать их вверх по иерархии, что позволяет ловить
+ * его с помощью try-catch за пределами scope.
  * */
+suspend fun errorExample5_1() {
+    val topLevelScope = CoroutineScope(Job())
 
-fun CoroutineScope.repeatIsActive() {
-    repeat(5) {
-        TimeUnit.MILLISECONDS.sleep(500)
-        println("Coroutine_${coroutineContext[CoroutineName]?.name} isActive $isActive")
+    topLevelScope.launch {
+        try {
+            coroutineScope {
+                launch {
+                    throw RuntimeException("RuntimeException in nested coroutine")
+                }
+            }
+        } catch (exception: Exception) {
+            println("Handle $exception in try/catch")
+        }
     }
+
+    Thread.sleep(100)
 }
 
 /**
- * Т.е. ошибка поднимается наверх до scope, отменяя все, что можно.
- * И далее распространяется на остальные корутины этого scope, каскадно отменяя в них все дочерние корутины.
+ * SupervisorScope
+ *
+ * Существует supervisorScope билдер, но мы можем передать superVisorJob в обычный scope и он превратится в supervisorScope.
+ * Его можно запомнить как более ограниченный чем coroutineScope. Если coroutineScope перестает пробрасывать исключения вверх по иерархии и пробрасывает
+ * их обычным способом, то supervisor scope перестает делать даже последнее.
  * */
+suspend fun errorExample5_2() {
+    val topLevelScope = CoroutineScope(Job())
+
+    topLevelScope.launch {
+        val job1 = launch {
+            println("starting Coroutine 1")
+        }
+
+        supervisorScope {
+            val job2 = launch {
+                println("starting Coroutine 2")
+            }
+
+            val job3 = launch {
+                println("starting Coroutine 3")
+            }
+        }
+    }
+
+    Thread.sleep(100)
+}
 
 /**
- * SuperVisorJob и вложенность
- * На самом последнем скрине https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/609-urok-14-korutiny-obrabotka-isklyucheniy-vlozhennye-korutiny.html
- * SupervisorJob помогает лиш частично. Мы сможем сохранить выпоплнение других корутин на уровне 1. Но Если ошибка произошла на уровне 2 - то
- * отменятся так же siblings корутины.
- * Мы не можем передать SuperVisorJob на уровне 1 т.к сломается механисм связи между родительскими и дочерними корутинами.
- * Говорит решение данной проблемы SuperVisorScope.
+ * Исключения обычно пробрасываются наверх достигая topLevelScope или superVisorScope. Таким образом можно сделать вывод, что корутины
+ * которые являются дочерними, но запускаются на SuperVisorScope - являются topLevel. А это значит что в них можно устанавливать coroutine
+ * exception handler и в случае возникновения exeption - он перехватится.
  * */
+
+suspend fun errorExample5_3() {
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
+        println("Handle $exception in CoroutineExceptionHandler")
+    }
+
+    val topLevelScope = CoroutineScope(Job())
+
+    topLevelScope.launch {
+        val job1 = launch {
+            println("starting Coroutine 1")
+        }
+
+        supervisorScope {
+            val job2 = launch(coroutineExceptionHandler) {
+                println("starting Coroutine 2")
+                throw RuntimeException("Exception in Coroutine 2")
+            }
+
+            val job3 = launch {
+                println("starting Coroutine 3")
+            }
+        }
+    }
+
+    Thread.sleep(100)
+}
 
 /**
- * Async/Await()
- * Вызов await всегда идет после тела async. Выброс исключения произойдет в await. Оно пойдет вверх по иерархии отменяя все siblings.
- * Если ниже await есть какой то важный код. То await имеет смысл оборачивать в try-catch. Иначе данный код не будет выполнен.
- * Там есть способ обработки ошибки с помощью костыля. Не посчитал нужным его разбирать.
+ * А для Async билдеров это значит что если они находятся в supervisor scope - то они являются parent и имеют соответствующее проведение.
+ * 1)Если мы вызываем async на созданном scope то exception выбросится только при вызове await()
+ * 2)Если мы передадим coroutine exception handler то exception всеровно туда не придет.
  * */
+suspend fun errorExample5_4() = coroutineScope {
+    launch {
+        supervisorScope {
+            val defered = async {
+                println("starting Coroutine 2")
+                throw RuntimeException("Exception in Coroutine 2")
+            }
 
+            defered.await()
+        }
+    }
+}
