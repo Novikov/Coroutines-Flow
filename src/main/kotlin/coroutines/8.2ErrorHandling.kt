@@ -13,7 +13,8 @@ suspend fun main() {
 //    errorExample5()
 //    errorExample5_1()
 //    errorExample5_2()
-    errorExample5_3()
+//    errorExample5_3()
+    errorExample5_4()
 }
 
 /**
@@ -253,7 +254,7 @@ suspend fun errorExample5_2() {
  * exception handler и в случае возникновения exeption - он перехватится.
  * */
 
-suspend fun errorExample5_3(){
+suspend fun errorExample5_3() {
     val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         println("Handle $exception in CoroutineExceptionHandler")
     }
@@ -278,4 +279,22 @@ suspend fun errorExample5_3(){
     }
 
     Thread.sleep(100)
+}
+
+/**
+ * А для Async билдеров это значит что если они находятся в supervisor scope - то они являются parent и имеют соответствующее проведение.
+ * 1)Если мы вызываем async на созданном scope то exception выбросится только при вызове await()
+ * 2)Если мы передадим coroutine exception handler то exception всеровно туда не придет.
+ * */
+suspend fun errorExample5_4() = coroutineScope {
+    launch {
+        supervisorScope {
+            val defered = async {
+                println("starting Coroutine 2")
+                throw RuntimeException("Exception in Coroutine 2")
+            }
+
+            defered.await()
+        }
+    }
 }
