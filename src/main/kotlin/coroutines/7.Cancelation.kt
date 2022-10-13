@@ -2,6 +2,7 @@ package coroutines
 
 import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.ContinuationInterceptor
 
 suspend fun main() {
     coroutineCancellationExample()
@@ -14,18 +15,20 @@ suspend fun main() {
  * 1.Через job. 1.1Отменится моментально если внутри есть suspend функция, например delay. Это случится потому что в этом случае будет генериться CancelationException.
  * Данный exception можно поймать с помощью try catch, но это не обязательно. Если не обработаем - краша не будет т.к данный тип исключения обрабатывается
  * с помощью внутренних механизмов.
- * 1.2 Если вместо delay будет не suspend функция, например TimeUnit.MILLISECONDS.sleep(1000), -
+ *
+ * 1.2 Если внутри нет функций который генерят cancelable exception -
  * отмена не произойдет. В это случае поменяется только статус у coroutineScope. Чтобы работа внутри launch не выполнялась -
  * необходимо вручную проверять статус coroutineScope. Это можно посмотреть в Android примере.
+ *
  * 2.Через scope. В этом случае произойдет моментальная отмена.
  * */
 
 suspend fun coroutineCancellationExample() = coroutineScope {
     val downloader: Job = launch {
         println("Начинаем загрузку файлов")
-        for (i in 1..5) {
+        for (i in 1..10) {
             if (isActive){
-                println("Загружен файл $i")
+                println("Загружен файл $i ${coroutineContext[ContinuationInterceptor]}")
                 TimeUnit.MILLISECONDS.sleep(1000) //поменять на delay(1000)
             }
         }
