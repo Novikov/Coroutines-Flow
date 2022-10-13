@@ -5,9 +5,10 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.ContinuationInterceptor
 
 suspend fun main() {
-    coroutineCancellationExample()
+//    coroutineCancellationExample()
 //    catchExternalCancellationInLaunch()
 //    catchExternalCancellationInAsync()
+    timeOutExample()
 }
 
 /**
@@ -27,7 +28,7 @@ suspend fun coroutineCancellationExample() = coroutineScope {
     val downloader: Job = launch {
         println("Начинаем загрузку файлов")
         for (i in 1..10) {
-            if (isActive){ //другой способ вызвать yield() вместо условия
+            if (isActive) { //другой способ вызвать yield() вместо условия
                 println("Загружен файл $i ${coroutineContext[ContinuationInterceptor]}")
                 TimeUnit.MILLISECONDS.sleep(1000) //поменять на delay(1000)
             }
@@ -124,4 +125,19 @@ suspend fun getMessage2(): String {
  * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
  * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
  * */
+
+
+/**
+ * Есть специальная функция которая генерит наследника cancelation exception если выполнение корутины занимает больше по времени, чем наши ограничения.
+ * */
+suspend fun timeOutExample() = coroutineScope {
+    launch {
+        withTimeout(1300L) {
+            repeat(1000) { i ->
+                println("I'm sleeping $i ...")
+                delay(500L)
+            }
+        }
+    }
+}
 
