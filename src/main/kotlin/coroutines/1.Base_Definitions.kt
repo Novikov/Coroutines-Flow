@@ -93,8 +93,25 @@ suspend fun lostCoroutineExample() {
 }
 
 /**
- * Существует 2 типа suspend функций: обычные и отменяемые.
- * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
- * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
- * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
+ * Корутины никак не блокируют друг друга.
  * */
+private fun blockingTest() {
+    val scope = CoroutineScope(Job())
+    println("onRun, start")
+
+    scope.launch {
+        println("coroutine, start ${Thread.currentThread().name}")
+        TimeUnit.MILLISECONDS.sleep(1000)
+        println("coroutine, end ${Thread.currentThread().name}")
+    }
+
+    println("onRun, middle")
+
+    scope.launch {
+        println("coroutine2, start ${Thread.currentThread().name}")
+        TimeUnit.MILLISECONDS.sleep(1500)
+        println("coroutine2, end ${Thread.currentThread().name}")
+    }
+
+    println("onRun, end")
+}

@@ -4,9 +4,9 @@ import kotlinx.coroutines.*
 import java.util.concurrent.TimeUnit
 
 suspend fun main() {
-//    coroutineCancellationExample()
+    coroutineCancellationExample()
 //    catchExternalCancellationInLaunch()
-    blockingTest()
+//    catchExternalCancellationInAsync()
 }
 
 /**
@@ -24,14 +24,16 @@ suspend fun coroutineCancellationExample() = coroutineScope {
     val downloader: Job = launch {
         println("Начинаем загрузку файлов")
         for (i in 1..5) {
+            if (isActive){
                 println("Загружен файл $i")
                 TimeUnit.MILLISECONDS.sleep(1000) //поменять на delay(1000)
+            }
         }
     }
     delay(800L)     // установим задержку, чтобы несколько файлов загрузились
     println("Надоело ждать, пока все файлы загрузятся. Прерву-ка я загрузку...")
     downloader.cancel()    // отменяем корутину
-    downloader.join()      // ожидаем завершения корутины (пробовал удалять - никак не влияет на вывод)
+    downloader.join()      // ожидаем завершения корутины (в данном случае эта строчка кода никак не повлияет на результата потому что операция не ресурсозатратная)
     println("Работа программы завершена")
 }
 
@@ -44,6 +46,7 @@ suspend fun coroutineCancellationExample() = coroutineScope {
  * Все suspend-функции в пакете kotlinx.coroutines являются прерываемыми (cancellable).
  * Это значит, что они проверяют, прервана ли корутина. И если ее выполнение прервано, они генерируют исключение типа CancellationException.
  * И в самой корутине мы можем перехватить это исключение, чтобы обработать отмену корутины.
+ * Именно поэтому в данном случае не нужно делать проверку на isActive.
  *
  * Обработать внешнее прирывание операции можно следующим образом:
  * */
@@ -100,45 +103,15 @@ suspend fun getMessage2(): String {
     return "Hello"
 }
 
-
 /**
  * Отмена родительского scope отменяет все дочерние.
  * Отмена рядового job не влияет на его siblings
  * */
 
-
 /**
- * Корутины никак не блокируют друг друга.
- * */
-private fun blockingTest() {
-    val scope = CoroutineScope(Job())
-    println("onRun, start")
-
-    scope.launch {
-        println("coroutine, start ${Thread.currentThread().name}")
-        TimeUnit.MILLISECONDS.sleep(1000)
-        println("coroutine, end ${Thread.currentThread().name}")
-    }
-
-    println("onRun, middle")
-
-    scope.launch {
-        println("coroutine2, start ${Thread.currentThread().name}")
-        TimeUnit.MILLISECONDS.sleep(1500)
-        println("coroutine2, end ${Thread.currentThread().name}")
-    }
-
-    println("onRun, end")
-}
-
-/**
- * При вызове метода cancel по ссылке Job - мы не отменяем корутину, а меняем ее статус. Она продолжит выполняться.
- * Для того, чтобы перестать выполнять работу через данную корутину необходимо отслеживать ее статус.
- * Т.е пишется условие на проверку текущий scope isActive. Пример можно увидеть вот тут https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/602-urok-8-korutiny-otmena.html
- * или в app модуле андройд проекта.
+ * Существует 2 типа suspend функций: обычные и отменяемые.
+ * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
+ * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
+ * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
  * */
 
-/**
- * Так же можно сделать cancel по ссылке Scope. Тогда отменяться все дочерние job которые лежат внутри данного scope. В это случае
- * Все корутины будут отменены. Проверять статус не придется.
- * */
