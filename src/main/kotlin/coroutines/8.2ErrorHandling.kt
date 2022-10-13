@@ -11,8 +11,9 @@ suspend fun main() {
 //    errorExample4()
 //    errorExample4_1()
 //    errorExample5()
-    errorExample5_1()
-
+//    errorExample5_1()
+//    errorExample5_2()
+    errorExample5_3()
 }
 
 /**
@@ -211,6 +212,68 @@ suspend fun errorExample5_1() {
             }
         } catch (exception: Exception) {
             println("Handle $exception in try/catch")
+        }
+    }
+
+    Thread.sleep(100)
+}
+
+/**
+ * SupervisorScope
+ *
+ * Существует supervisorScope билдер, но мы можем передать superVisorJob в обычный scope и он превратится в supervisorScope.
+ * Его можно запомнить как более ограниченный чем coroutineScope. Если coroutineScope перестает пробрасывать исключения вверх по иерархии и пробрасывает
+ * их обычным способом, то supervisor scope перестает делать даже последнее.
+ * */
+suspend fun errorExample5_2() {
+    val topLevelScope = CoroutineScope(Job())
+
+    topLevelScope.launch {
+        val job1 = launch {
+            println("starting Coroutine 1")
+        }
+
+        supervisorScope {
+            val job2 = launch {
+                println("starting Coroutine 2")
+            }
+
+            val job3 = launch {
+                println("starting Coroutine 3")
+            }
+        }
+    }
+
+    Thread.sleep(100)
+}
+
+/**
+ * Исключения обычно пробрасываются наверх достигая topLevelScope или superVisorScope. Таким образом можно сделать вывод, что корутины
+ * которые являются дочерними, но запускаются на SuperVisorScope - являются topLevel. А это значит что в них можно устанавливать coroutine
+ * exception handler и в случае возникновения exeption - он перехватится.
+ * */
+
+suspend fun errorExample5_3(){
+    val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
+        println("Handle $exception in CoroutineExceptionHandler")
+    }
+
+    val topLevelScope = CoroutineScope(Job())
+
+    topLevelScope.launch {
+        val job1 = launch {
+            println("starting Coroutine 1")
+        }
+
+        supervisorScope {
+            val job2 = launch(coroutineExceptionHandler) {
+                println("starting Coroutine 2")
+                throw RuntimeException("Exception in Coroutine 2")
+            }
+
+            val job3 = launch {
+                println("starting Coroutine 3")
+            }
         }
     }
 
