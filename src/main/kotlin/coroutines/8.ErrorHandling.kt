@@ -5,12 +5,12 @@ import java.util.concurrent.TimeUnit
 
 suspend fun main() {
 //    errorHandlingExample1()
+//    errorHandlingExample1_1()
 //    errorHandlingExample2()
     errorHandlingExample3()
 //    errorHandlingExample4()
 //    errorHandlingExample5()
 //    errorHandlingExample6()
-//    errorHandlingExample7()
 }
 
 /** Исключение не обработается
@@ -40,7 +40,7 @@ private suspend fun errorHandlingExample1() = coroutineScope {
  * Поэтому try его не отловит*/
 
 /**Следующий код отловит исключение потому что мы оборачиваем в catch непосредственно в месте вызова.*/
-private suspend fun errorHandlingExample2() = coroutineScope {
+private suspend fun errorHandlingExample1_1() = coroutineScope {
     println("onRun start")
     launch {
         try {
@@ -53,41 +53,39 @@ private suspend fun errorHandlingExample2() = coroutineScope {
 }
 
 /**
- * Re-throw
- * Но на самом деле под капотом происходила определенная работа по обработке этого исключения. Оно было перехвачено, но потом снова выброшено.
- * При возникновении Exception в дочерней корутине - происходит отмена родительского job() и всех дочерних корутин.
- * Далее Job корутины пытается самостоятельно обработать исключение, которое он получил из Continuation.
- * Для этого он проверяет свой контекст, есть ли там объект CoroutineExceptionHandler.
- * Если Job находит этот объект, он передает ему исключение и крэша не будет.
- * Если же такого объекта в контексте не было, то Job отправит исключение в глобальный обработчик ошибок, который завершит работу приложения с крэшем.
+ * CoroutineExceptionHandler
  *
- * Код ниже не перехватит Exception потому что coroutine exception handler установлен в дочерний cope. Для того, чтобы это заработало - нужно создать
- * scope и передать coroutine Exception handler в конструктор вторым параметром, после Job(). В таком случае это будет работать.
+ * Код ниже не перехватит Exception потому что coroutine exception handler установлен в дочерний scope. Для того, чтобы это заработало - нужно создать
+ * scope и передать coroutine Exception handler в конструктор вторым параметром, после Job(),  но через + а не через запятую.
+ * В таком случае это будет работать.
  * Все это очень хорошо расписано вот тут https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
  * */
-private suspend fun errorHandlingExample3() = coroutineScope {
+
+/**
+ * ^ Важный момент. Даже если мы создадим coroutineExceptionHandler - при возникновении ошибки всеровно отменятся все дочерние корутины.*/
+private suspend fun errorHandlingExample2() = coroutineScope {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("handled $exception")
     }
 
     println("onRun start")
     launch(handler) {
-        launch {
-            Integer.parseInt("a")
-        }
+        Integer.parseInt("a")
     }
     println("onRun end")
 }
 
 /**
- * Важный момент. Даже если мы создадим coroutineExceptionHandler - при возникновении ошибки всеровно отменятся все дочерние корутины.*/
-suspend fun errorHandlingExample4() = coroutineScope {
+ * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
+ * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
+ * */
+suspend fun errorHandlingExample3() = coroutineScope {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
 
     launch(handler) {
-        TimeUnit.MILLISECONDS.sleep(1000)
+        TimeUnit.MILLISECONDS.sleep(300)
         Integer.parseInt("a")
     }
 
@@ -97,13 +95,11 @@ suspend fun errorHandlingExample4() = coroutineScope {
             println("second coroutine isActive ${isActive}")
         }
     }
+
+    delay(5000)
 }
 
-/**
- * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
- * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
- * */
-suspend fun errorHandlingExample5() {
+suspend fun errorHandlingExample4() {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
@@ -133,7 +129,7 @@ suspend fun errorHandlingExample5() {
  * Для этого надо в scope вместо обычного Job() использовать SupervisorJob(). Он отличается от Job() тем, что не отменяет всех своих детей при возникновении ошибки в одном из них.
  * */
 
-suspend fun errorHandlingExample6() {
+suspend fun errorHandlingExample5() {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
@@ -170,7 +166,7 @@ suspend fun errorHandlingExample6() {
  * Потому что только она получит от своего родителя отрицательный ответ и попытается обработать ошибку сама.
  * Остальные корутины просто передают ошибку родительской корутине и сами ничего с ней делают
  * */
-suspend fun errorHandlingExample7() {
+suspend fun errorHandlingExample6() {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("$exception was handled in Coroutine_${context[CoroutineName]?.name}")
     }
