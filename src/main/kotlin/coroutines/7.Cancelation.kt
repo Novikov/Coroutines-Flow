@@ -129,6 +129,7 @@ suspend fun getMessage2(): String {
 
 /**
  * Есть специальная функция которая генерит наследника cancelation exception если выполнение корутины занимает больше по времени, чем наши ограничения.
+ * Есть аналог который возвращает вместо CancelationException - null (withTimeoutOrNull())
  * */
 suspend fun timeOutExample() = coroutineScope {
     launch {
