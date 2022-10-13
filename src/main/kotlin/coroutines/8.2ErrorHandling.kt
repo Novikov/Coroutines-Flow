@@ -6,10 +6,13 @@ import java.util.concurrent.TimeUnit
 suspend fun main() {
 //    errorExample1()
 //    errorExample1_1()
-    errorExample2()
+//    errorExample2()
 //    errorExample2_1()
 //    errorExample4()
 //    errorExample4_1()
+//    errorExample5()
+    errorExample5_1()
+
 }
 
 /**
@@ -163,11 +166,11 @@ suspend fun errorExample4_1() = coroutineScope {
 }
 
 /**
- * #5 CoroutineScope
+ * #5 Scope
  * Разные scope никак не связаны между собой. Если в первом будет ошибка, второй продолжит работать.
  * Данный handler передастся во все дочерние корутины т.к он является частью coroutine context.
  * */
-suspend fun errorHandlingExample5() = coroutineScope {
+suspend fun errorExample5() = coroutineScope {
     val handler = CoroutineExceptionHandler { context, exception ->
         println("first coroutine exception $exception")
     }
@@ -188,4 +191,28 @@ suspend fun errorHandlingExample5() = coroutineScope {
     }
 
     delay(5000)
+}
+
+/**
+ * CoroutineScope
+ * Try-Catch не должен перехватывать exception если он расположен над coroutine билдером, но в случае с coroutine scope это правило н работает.
+ * Coroutine scope повтороно генерирует исключение своих дочерних элементов вместо того, чтобы прокидывать их вверх по иерархии, что позволяет ловить
+ * его с помощью try-catch за пределами scope.
+ * */
+suspend fun errorExample5_1() {
+    val topLevelScope = CoroutineScope(Job())
+
+    topLevelScope.launch {
+        try {
+            coroutineScope {
+                launch {
+                    throw RuntimeException("RuntimeException in nested coroutine")
+                }
+            }
+        } catch (exception: Exception) {
+            println("Handle $exception in try/catch")
+        }
+    }
+
+    Thread.sleep(100)
 }
