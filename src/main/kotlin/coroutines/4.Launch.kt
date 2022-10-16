@@ -5,7 +5,8 @@ import kotlinx.coroutines.*
 suspend fun main() {
 //    launchExample()
 //    joinLaunchExample()
-    lazyLaunchExample()
+//    lazyLaunchExample()
+    asyncEmulationExample()
 }
 
 /**
@@ -67,3 +68,32 @@ suspend fun lazyLaunchExample() = coroutineScope {
 /**
  * Все тоже самое можно проделать с помощью async
  * */
+
+
+/**
+ * Async emulation
+ * 1)С помощью launch нельзя сделать 2 concurent запроса.
+ * 2)С помощью launch нельзя вернуть результат.
+ * */
+
+suspend fun asyncEmulationExample() = coroutineScope {
+
+    val startTime = System.currentTimeMillis()
+
+    val job1 = launch {
+        delay(200)
+        println("work from job1")
+    }
+
+    val job2 = launch {
+        delay(400)
+        println("work from job2")
+    }
+
+    job1.join()
+    job2.join()
+
+    val endTime = System.currentTimeMillis() - startTime
+
+    println("coroutine end $endTime")
+}
