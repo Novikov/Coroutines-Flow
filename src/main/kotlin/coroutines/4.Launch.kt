@@ -74,6 +74,9 @@ suspend fun lazyLaunchExample() = coroutineScope {
  * Async emulation
  * 1)С помощью launch можно сделать 2 simultaneously запроса. Для этого нужно убрать join()
  * 2)С помощью launch нельзя вернуть результат.
+ * 3)Мы можем влиять на время выполнения с помощью join(). В текущем примере ниже с помощью join() мы говорим внешней корутине подождать выполнения
+ * дочерних корутин. Время выполнения будет немного больше чем 400 милисекунд. Если вызвать jon1.join() сразу после его launch билдера (закомментированный код),
+ * то время работы увеличится потому что вторая корутина будет ждать выполнения первой.
  * */
 
 suspend fun asyncEmulationExample() = coroutineScope {
@@ -84,6 +87,8 @@ suspend fun asyncEmulationExample() = coroutineScope {
         delay(200)
         println("work from job1")
     }
+
+//    job1.join()
 
     val job2 = launch {
         delay(400)
