@@ -72,7 +72,7 @@ suspend fun lazyLaunchExample() = coroutineScope {
 
 /**
  * Async emulation
- * 1)С помощью launch нельзя сделать 2 concurent запроса.
+ * 1)С помощью launch можно сделать 2 simultaneously запроса. Для этого нужно убрать join()
  * 2)С помощью launch нельзя вернуть результат.
  * */
 
