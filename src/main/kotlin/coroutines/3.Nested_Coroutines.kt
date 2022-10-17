@@ -1,15 +1,13 @@
 package coroutines
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 
 suspend fun main() {
 //    nestedCoroutineExample()
 //    parentWaitChildExample()
 //    parallelWorkExample()
-    relationBetweenParentAndChild()
+//    relationBetweenParentAndChild()
+    nestedLaunchExample()
 }
 
 /*** Launch билдер создает свой внутренний scope.
@@ -89,7 +87,7 @@ suspend fun parallelWorkExample() = coroutineScope {
 
         println("parent coroutine, end")
 
-        println("Elapsed time in miliseconds: ${end-begin}")
+        println("Elapsed time in miliseconds: ${end - begin}")
     }
 }
 
@@ -117,3 +115,5 @@ suspend fun relationBetweenParentAndChild() = coroutineScope {
 /**
  * Можно переопределять контекст дочерних корутин путем передачи других параметров.
  * */
+
+
