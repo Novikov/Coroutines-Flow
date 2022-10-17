@@ -1,13 +1,14 @@
 package coroutines
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 suspend fun main() {
 //    nestedCoroutineExample()
 //    parentWaitChildExample()
 //    parallelWorkExample()
-//    relationBetweenParentAndChild()
-    nestedLaunchExample()
+    relationBetweenParentAndChild()
 }
 
 /*** Launch билдер создает свой внутренний scope.
@@ -115,5 +116,3 @@ suspend fun relationBetweenParentAndChild() = coroutineScope {
 /**
  * Можно переопределять контекст дочерних корутин путем передачи других параметров.
  * */
-
-
