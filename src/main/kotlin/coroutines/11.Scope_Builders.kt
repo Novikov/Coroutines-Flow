@@ -3,7 +3,8 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-    globalScopeExample()
+//    globalScopeExample()
+    coroutineScopeExample()
 }
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
@@ -27,8 +28,22 @@ suspend fun withContextExample() {
 /**
  * coroutineScope билдер
  * */
-suspend fun coroutineScopeExample() {
-
+suspend fun coroutineScopeExample() = coroutineScope {
+   val job1 =  launch {
+        println("Start task 1")
+        delay(100)
+        println("End task 1")
+    }
+    val job2 = launch {
+        println("Start task 2")
+        delay(200)
+        println("End task 2")
+    }
+    val job3 = launch {
+        println("Start task 3")
+        delay(300)
+        println("End task 3")
+    }
 }
 
 
