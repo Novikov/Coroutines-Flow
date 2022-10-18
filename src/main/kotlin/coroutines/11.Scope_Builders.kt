@@ -1,9 +1,6 @@
 package coroutines
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 
 suspend fun main() {
     globalScopeExample()
@@ -17,16 +14,20 @@ suspend fun globalScopeExample() {
 }
 
 /**
- *
- * */
+ * withContext() используется, чтобы изменить контекст для определенного участка кода.
+ * Например, мы выполняем ресурсозатратные вычисления на viewModelScope. По умолчанию данный scope использует Dispatcher UI потока.
+ * UI поток начнет фризиться. Чтобы этого не произошло, берем оборачиваем участок кода, отвечающий за вычисления с помощью withContext(Dispatcher.Default)
+ */
+suspend fun coroutineScopeExample() {
+    withContext(Dispatchers.Default) {
+        // calculations
+    }
+}
+
 suspend fun viewModelScopeExample() {
 
 }
-suspend fun coroutineScopeExample() {
-    withContext(Job()) {
 
-    }
-}
 
 //withContext 15.42
 //coroutineScope
