@@ -5,7 +5,8 @@ import kotlinx.coroutines.*
 suspend fun main() {
 //    globalScopeExample()
 //    coroutineScopeExample()
-    coroutineScopeExample2()
+//    coroutineScopeExample2()
+    supervisorScopeExample()
 }
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
@@ -67,6 +68,32 @@ suspend fun coroutineScopeExample2() = coroutineScope {
         launch {
             println("Start task 1")
             delay(100)
+//            throw Exception() посмотри как различается поведение выброса исключений с примером ниже
+            println("End task 1")
+        }
+        launch {
+            println("Start task 2")
+            delay(200)
+            println("End task 2")
+        }
+    }
+
+    val job3 = launch {
+        println("Start task 3")
+        delay(300)
+        println("End task 3")
+    }
+}
+
+/**
+ * Пример с supervisorScope. Раскоментируй строку с выбросом исключений и посмотри как меняется поведение обработки ошибок.
+ * */
+suspend fun supervisorScopeExample() = coroutineScope {
+    supervisorScope {
+        launch {
+            println("Start task 1")
+            delay(100)
+//            throw Exception()
             println("End task 1")
         }
         launch {
