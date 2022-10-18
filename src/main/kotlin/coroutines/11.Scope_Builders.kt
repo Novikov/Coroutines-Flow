@@ -113,6 +113,8 @@ suspend fun supervisorScopeExample() = coroutineScope {
 /**
  * Порядок выполнения различных scope.
  * Нет гарантии последовательного выполнения. coroutineScope1 -> coroutineScope2 -> coroutineScope3
+ * coroutine scope это просто билдер. Если нет возможности прицепиться к viewmodelScope или lifeCycleScope - то необходимо использовать его.
+ * Если необходимо изменить поведение прокидования ошибок (Structured concurency) - используем supervisor scope.
  * */
 suspend fun scopesExecutionExample() = coroutineScope {
     val coroutineScope1 = CoroutineScope(Job())
