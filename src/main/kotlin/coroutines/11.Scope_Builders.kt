@@ -8,6 +8,7 @@ suspend fun main() {
 //    coroutineScopeExample2()
 //    supervisorScopeExample()
     scopesExecutionExample()
+//    scopesExecutionExample2()
 }
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
@@ -111,8 +112,7 @@ suspend fun supervisorScopeExample() = coroutineScope {
 
 /**
  * Порядок выполнения различных scope.
- * Все созданные scope внутри другого scope будут запускаться последовательно, но завершаться в зависимости от времени выполнения.
- * Если убрать внешний coroutineScope билдер, то гарантия последовательного запуска теряется.
+ * Нет гарантии последовательного выполнения. coroutineScope1 -> coroutineScope2 -> coroutineScope3
  * */
 suspend fun scopesExecutionExample() = coroutineScope {
     val coroutineScope1 = CoroutineScope(Job())
