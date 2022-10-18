@@ -7,8 +7,8 @@ suspend fun main() {
 //    coroutineScopeExample()
 //    coroutineScopeExample2()
 //    supervisorScopeExample()
-    scopesExecutionExample()
-//    scopesExecutionExample2()
+//    scopesExecutionExample()
+    scopesExecutionExample2()
 }
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
@@ -136,6 +136,35 @@ suspend fun scopesExecutionExample() = coroutineScope {
     coroutineScope3.launch {
         println("Start task 3")
         delay(100)
+        println("End task 3")
+    }
+
+    Thread.sleep(1000)
+}
+
+/**
+ * Но нужно помнить что создавая scope - мы выключаем concurent поведение.
+ * Блок кода внутри coroutineScope всегда будет выигрывать конкуренцию с другим кодом.
+ * */
+suspend fun scopesExecutionExample2() = coroutineScope {
+
+    coroutineScope {
+        launch {
+            println("Start task 1")
+            delay(300)
+            println("End task 1")
+        }
+
+        launch {
+            println("Start task 2")
+            delay(300)
+            println("End task 2")
+        }
+    }
+
+    launch {
+        println("Start task 3")
+        delay(5)
         println("End task 3")
     }
 
