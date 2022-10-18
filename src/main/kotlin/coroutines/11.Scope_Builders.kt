@@ -6,7 +6,8 @@ suspend fun main() {
 //    globalScopeExample()
 //    coroutineScopeExample()
 //    coroutineScopeExample2()
-    supervisorScopeExample()
+//    supervisorScopeExample()
+    scopesExecutionExample()
 }
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
@@ -58,22 +59,20 @@ suspend fun coroutineScopeExample() = coroutineScope {
 /**
  * Точно такого же поведения можно добиться с помощью coroutineScope билдера.
  * Есть еще другой вариант - поместить task1 и task2 в launch и вызывать на нем join() до выполнения task3.
- * Данный scope отдаст управление на task3 только когда все его child будут завершены.
- * Т.е получается если я понял правильно - scope билдер это всегда вершина иерархии и здесь не работает правило не блокировки корутин.
- * Т.е будет ожидание, прежде чем выполнение перейдет на следующий участок кода.
+ * Данный scope отдаст управление на task3 только когда все его child будут завершены. Про порядок выполнения корутин есть отдельные примеры ниже.
  * */
 suspend fun coroutineScopeExample2() = coroutineScope {
 
     coroutineScope {
         launch {
             println("Start task 1")
-            delay(100)
+            delay(500)
 //            throw Exception() посмотри как различается поведение выброса исключений с примером ниже
             println("End task 1")
         }
         launch {
             println("Start task 2")
-            delay(200)
+            delay(500)
             println("End task 2")
         }
     }
@@ -108,6 +107,37 @@ suspend fun supervisorScopeExample() = coroutineScope {
         delay(300)
         println("End task 3")
     }
+}
+
+/**
+ * Порядок выполнения различных scope.
+ * Все созданные scope внутри другого scope будут запускаться последовательно, но завершаться в зависимости от времени выполнения.
+ * Если убрать внешний coroutineScope билдер, то гарантия последовательного запуска теряется.
+ * */
+suspend fun scopesExecutionExample() = coroutineScope {
+    val coroutineScope1 = CoroutineScope(Job())
+    val coroutineScope2 = CoroutineScope(Job())
+    val coroutineScope3 = CoroutineScope(Job())
+
+    coroutineScope1.launch {
+        println("Start task 1")
+        delay(300)
+        println("End task 1")
+    }
+
+    coroutineScope2.launch {
+        println("Start task 2")
+        delay(200)
+        println("End task 2")
+    }
+
+    coroutineScope3.launch {
+        println("Start task 3")
+        delay(100)
+        println("End task 3")
+    }
+
+    Thread.sleep(1000)
 }
 
 
