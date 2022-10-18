@@ -146,7 +146,7 @@ suspend fun scopesExecutionExample() = coroutineScope {
  * Но нужно помнить что создавая scope - мы выключаем concurent поведение.
  * Блок кода внутри coroutineScope всегда будет выигрывать конкуренцию с другим кодом.
  * */
-suspend fun scopesExecutionExample2() = coroutineScope {
+suspend fun scopesExecutionExample2() = coroutineScope { // TODO: Обсудить
 
     coroutineScope {
         launch {
