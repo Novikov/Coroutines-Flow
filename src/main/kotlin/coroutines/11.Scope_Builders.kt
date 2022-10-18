@@ -30,7 +30,7 @@ suspend fun withContextExample() {
  * coroutineScope билдер.
  * Практически во всех примерах данного проекта я получал scope через coroutineScope, но наверно лучше это было бы делать с помощью
  * val scope = CoroutineScope(Job())
- * Ниже есть поведение которого мы можем добиться с помощью coroutineScope билдера.
+ * Ниже есть поведение которого мы можем добиться с помощью coroutineScope билдера, что сделано в coroutineScopeExample2.
  * */
 suspend fun coroutineScopeExample() = coroutineScope {
     val job1 = launch {
@@ -54,6 +54,13 @@ suspend fun coroutineScopeExample() = coroutineScope {
     }
 }
 
+/**
+ * Точно такого же поведения можно добиться с помощью coroutineScope билдера.
+ * Есть еще другой вариант - поместить task1 и task2 в launch и вызывать на нем join() до выполнения task3.
+ * Данный scope отдаст управление на task3 только когда все его child будут завершены.
+ * Т.е получается если я понял правильно - scope билдер это всегда вершина иерархии и здесь не работает правило не блокировки корутин.
+ * Т.е будет ожидание, прежде чем выполнение перейдет на следующий участок кода.
+ * */
 suspend fun coroutineScopeExample2() = coroutineScope {
 
     coroutineScope {
