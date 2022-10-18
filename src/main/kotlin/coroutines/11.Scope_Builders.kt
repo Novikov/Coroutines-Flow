@@ -1,17 +1,29 @@
 package coroutines
 
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 suspend fun main() {
+    globalScopeExample()
+}
 
+/**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
+ * Время жизни данного scope соответствует времени жизни приложения. Его нужно избегать. Отменить его можно только вручную.
+ * */
+suspend fun globalScopeExample() {
+    println("${GlobalScope.coroutineContext[Job]}")
 }
 
 /**
  *
  * */
-suspend fun coroutineScopeExample(){
-    withContext(Job()){
+suspend fun viewModelScopeExample() {
+
+}
+suspend fun coroutineScopeExample() {
+    withContext(Job()) {
 
     }
 }
