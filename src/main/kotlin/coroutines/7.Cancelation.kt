@@ -8,8 +8,13 @@ suspend fun main() {
 //    cancellationExample1_2()
 //    cancellationExample1_3()
 //    cancellationExample1_4()
-    cancellationExample2()
+//    cancellationExample2()
+    cancellationExample3()
 }
+
+/**
+ * Корутина может находиться в различных состояниях. Все они перечислены здесь https://kotlinlang.org/api/kotlinx.coroutines/kotlinx-coroutines-core/kotlinx.coroutines/-job/
+ * */
 
 /**
  *Пример отмены корутины.
@@ -132,19 +137,37 @@ suspend fun cancellationExample2() = coroutineScope {
     }
 }
 
-
-//join + cancelAndJoin
-
 /**
- * CancelAndJoin() нужен для того чтобы подождать пока завершится корутина. В офф доке есть пример где эта строчка кода заставляет ждать пока выполнится
- * finaly блок у try-catch. https://kotlinlang.org/docs/cancellation-and-timeouts.html#closing-resources-with-finally
- *
- * состояния
- *
- * /**
+ * Cancel and join.
+ * Вызов метода join() у job заставляет подождать выполнения того, что ниже пока job не перейдет в состояние completed или canceled.
+ * В данное состояние job переходит не сразу. После вызова cancel() - сначала переходит в состояние canceling.
+ * Блок finally выполнится только после перехода в состояния canceled.
+ * */
+
+suspend fun cancellationExample3() = coroutineScope{
+    val job = launch {
+        try {
+            repeat(1000) { i ->
+                println("job: I'm sleeping $i ...")
+                delay(500L)
+            }
+        } finally {
+            println("job: I'm running finally")
+        }
+    }
+    delay(1300L) // delay a bit
+    println("main: I'm tired of waiting!")
+    job.cancel()
+    job.join()
+
+    //вызов двух методов можно заменить одним job.cancelAndJoin()
+
+    println("main: Now I can quit.")
+}
+
+ /**
  * Существует 2 типа suspend функций: обычные и отменяемые.
  * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
  * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
  * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
- * */
  * */
