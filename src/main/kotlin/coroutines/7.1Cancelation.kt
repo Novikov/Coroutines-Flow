@@ -46,7 +46,7 @@ suspend fun cancellationExample1_1() = coroutineScope {
 
 /**
  * Способы остановки работы внутри корутины
- * 1.Вызов suspend функций ensureActive(), yield(), delay()
+ * 1.Вызов suspend функций ensureActive(), yield(), delay(). Task - Посмотреть разницу между данными функциями
  * 2.Проверка состояния корутины с помощью оборота всего блока в if(isActive)
  * */
 
