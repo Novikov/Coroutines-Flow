@@ -5,15 +5,15 @@ import java.util.concurrent.TimeUnit
 import kotlin.coroutines.ContinuationInterceptor
 
 suspend fun main() {
-//    coroutineCancellationExample()
+    coroutineCancellationExample()
 //    catchExternalCancellationInLaunch()
 //    catchExternalCancellationInAsync()
-    timeOutExample()
+//    timeOutExample()
 }
 
 /**
  * Есть 2 варианта отмены корутины:
- * 1.Через job. 1.1Отменится моментально если внутри есть suspend функция, например delay. Это случится потому что в этом случае будет генериться CancelationException.
+ * 1.Через job. 1.1О отменится моментально если внутри есть suspend функция, например delay. Это случится потому что в этом случае будет генериться CancelationException.
  * Данный exception можно поймать с помощью try catch, но это не обязательно. Если не обработаем - краша не будет т.к данный тип исключения обрабатывается
  * с помощью внутренних механизмов.
  *
@@ -21,7 +21,8 @@ suspend fun main() {
  * отмена не произойдет. В это случае поменяется только статус у coroutineScope. Чтобы работа внутри launch не выполнялась -
  * необходимо вручную проверять статус coroutineScope. Это можно посмотреть в Android примере.
  *
- * 2.Через scope. В этом случае произойдет моментальная отмена.
+ * 2.Через scope. В этом случае произойдет моментальная отмена. Это сработает если создать scope вручную и запустить на нем корутину.
+ * Если попробовать отменить parent scope созданный через coroutine scope билдер - не сработает.
  * */
 
 suspend fun coroutineCancellationExample() = coroutineScope {
