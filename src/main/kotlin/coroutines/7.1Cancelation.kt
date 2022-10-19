@@ -64,6 +64,7 @@ suspend fun cancellationExample1_2() = coroutineScope {
     job.cancel()
 }
 
+/*** Данный способ имеет преимущество в том, что не выбрасывает мгновенно cancellation exception и позволяет выполнить некоторые cleanUp operations */
 suspend fun cancellationExample1_3() = coroutineScope {
     val job = launch {
         repeat(10) { index ->
@@ -71,6 +72,9 @@ suspend fun cancellationExample1_3() = coroutineScope {
                 delay(1)
                 println("operation number $index")
                 Thread.sleep(100)
+            } else {
+                //perform cleanup operations
+                throw CancellationException()
             }
         }
     }
