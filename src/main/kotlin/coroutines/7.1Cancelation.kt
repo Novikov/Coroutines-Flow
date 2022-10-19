@@ -6,7 +6,8 @@ suspend fun main() {
 //    cancellationExample1()
 //    cancellationExample1_1()
 //    cancellationExample1_2()
-    cancellationExample1_3()
+//    cancellationExample1_3()
+    cancellationExample1_4()
 }
 
 /**
@@ -46,7 +47,7 @@ suspend fun cancellationExample1_1() = coroutineScope {
 
 /**
  * Способы остановки работы внутри корутины
- * 1.Вызов suspend функций ensureActive(), yield(), delay(). Task - Посмотреть разницу между данными функциями
+ * 1.Вызов suspend функций ensureActive(), yield(), delay() или любая другая suspend function. Task - Посмотреть разницу между данными функциями
  * 2.Проверка состояния корутины с помощью оборота всего блока в if(isActive)
  * */
 
@@ -75,6 +76,33 @@ suspend fun cancellationExample1_3() = coroutineScope {
             } else {
                 //perform cleanup operations
                 println("Clean up")
+                throw CancellationException()
+            }
+        }
+    }
+    delay(250)
+    println("canceling coroutine")
+    job.cancel()
+}
+
+/**
+ * После того, как выполнился cancel и job корутины перешел в состояние isActive == false - вызов любой функции приведет к выбросу cancellation exception.
+ * Поэтому если необходимо выполнить некоторый suspend код (например в блоке else clenUp operations) - оборачиваем все это дело в
+ * withContext(NonCancelable)
+ * */
+suspend fun cancellationExample1_4() = coroutineScope {
+    val job = launch {
+        repeat(10) { index ->
+            if (isActive) {
+                delay(1)
+                println("operation number $index")
+                Thread.sleep(100)
+            } else {
+                //perform cleanup operations
+                withContext(NonCancellable){
+                    delay(100)
+                    println("Clean up")
+                }
                 throw CancellationException()
             }
         }
