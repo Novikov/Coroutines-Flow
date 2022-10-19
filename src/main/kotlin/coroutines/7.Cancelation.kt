@@ -1,7 +1,9 @@
 package coroutines
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.NonCancellable.cancel
 import java.lang.Exception
+import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    cancellationExample1()
@@ -206,8 +208,11 @@ suspend fun cancellationExample3_1() = coroutineScope {
  * */
 
 /**
- * Существует 2 типа suspend функций: обычные и отменяемые.
- * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
- * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
- * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
+ * Если мы оборачиваем в suspend какой либо внешний api то есть 2 варианта получения continuation.
+ * Не что похожее реализовано на стороне retrofit. Там колбеки которые необходимо обернуть. Об этом в конце лекции про отмену.
+ * Второй вариант насколько я понимаю поддерживает возможность отмены, а первый нет. Разобраться если придет задача сделать нечто похожее.
  * */
+suspend fun cancellationExample4() {
+    suspendCoroutine<Int> {}
+    suspendCancellableCoroutine<Int> {}
+}
