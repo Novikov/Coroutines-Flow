@@ -74,6 +74,7 @@ suspend fun cancellationExample1_3() = coroutineScope {
                 Thread.sleep(100)
             } else {
                 //perform cleanup operations
+                println("Clean up")
                 throw CancellationException()
             }
         }
