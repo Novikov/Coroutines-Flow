@@ -1,138 +1,125 @@
 package coroutines
 
 import kotlinx.coroutines.*
-import java.util.concurrent.TimeUnit
-import kotlin.coroutines.ContinuationInterceptor
 
 suspend fun main() {
-    coroutineCancellationExample()
-//    catchExternalCancellationInLaunch()
-//    catchExternalCancellationInAsync()
-//    timeOutExample()
+//    cancellationExample1()
+//    cancellationExample1_1()
+//    cancellationExample1_2()
+//    cancellationExample1_3()
+//    cancellationExample1_4()
+    cancellationExample2()
 }
 
 /**
- * Есть 2 варианта отмены корутины:
- * 1.Через job. 1.1О отменится моментально если внутри есть suspend функция, например delay. Это случится потому что в этом случае будет генериться CancelationException.
- * Данный exception можно поймать с помощью try catch, но это не обязательно. Если не обработаем - краша не будет т.к данный тип исключения обрабатывается
- * с помощью внутренних механизмов.
- *
- * 1.2 Если внутри нет функций который генерят cancelable exception -
- * отмена не произойдет. В это случае поменяется только статус у coroutineScope. Чтобы работа внутри launch не выполнялась -
- * необходимо вручную проверять статус coroutineScope. Это можно посмотреть в Android примере.
- *
- * 2.Через scope. В этом случае произойдет моментальная отмена. Это сработает если создать scope вручную и запустить на нем корутину.
- * Если попробовать отменить parent scope созданный через coroutine scope билдер - не сработает.
+ *Пример отмены корутины.
+ * job.cancel() не является suspend функцией и может быть вызывана где угодно.
+ * Тоже самое можно сделать если вручную создать scope и вызывать cancel на нем.
+ * */
+suspend fun cancellationExample1() = coroutineScope {
+    val job = launch {
+        repeat(10) { index ->
+            println("operation number $index")
+            delay(100)
+        }
+    }
+    delay(250)
+    println("canceling coroutine")
+    job.cancel()
+}
+
+/**
+ * Если заменить delay внутри launch на Thread sleep, то отмена не произойдет. Причина в том, что если вызывается suspend функция (например delay)
+ * на coroutine scope который уже в состоянии cancelling то будет брошен особый CancellationException, который прервет выполнение корутины.
+ * Данный Exception обрабатывать не обязательно, но можно если надо. В примере ниже нет suspend функции поэтоу выполнение не прервется.
+ * Все suspend функции в библиотеке корутин - cancelable (генерят Cancellation exception если job isActive == false)
+ * */
+suspend fun cancellationExample1_1() = coroutineScope {
+    val job = launch {
+        repeat(10) { index ->
+            delay(1)
+            println("operation number $index")
+            Thread.sleep(100)
+        }
+    }
+    delay(250)
+    println("canceling coroutine")
+    job.cancel()
+}
+
+/**
+ * Способы остановки работы внутри корутины
+ * 1.Вызов suspend функций ensureActive(), yield(), delay() или любая другая suspend function. Task - Посмотреть разницу между данными функциями
+ * 2.Проверка состояния корутины с помощью оборота всего блока в if(isActive)
  * */
 
-suspend fun coroutineCancellationExample() = coroutineScope {
-    val downloader: Job = launch {
-        println("Начинаем загрузку файлов")
-        for (i in 1..10) {
-            if (isActive) { //другой способ вызвать yield() вместо условия
-                println("Загружен файл $i ${coroutineContext[ContinuationInterceptor]}")
-                TimeUnit.MILLISECONDS.sleep(1000) //поменять на delay(1000)
+suspend fun cancellationExample1_2() = coroutineScope {
+    val job = launch {
+        repeat(10) { index ->
+            yield()
+            delay(1)
+            println("operation number $index")
+            Thread.sleep(100)
+        }
+    }
+    delay(250)
+    println("canceling coroutine")
+    job.cancel()
+}
+
+/*** Данный способ имеет преимущество в том, что не выбрасывает мгновенно cancellation exception и позволяет выполнить некоторые cleanUp operations */
+suspend fun cancellationExample1_3() = coroutineScope {
+    val job = launch {
+        repeat(10) { index ->
+            if (isActive) {
+                delay(1)
+                println("operation number $index")
+                Thread.sleep(100)
+            } else {
+                //perform cleanup operations
+                println("Clean up")
+                throw CancellationException()
             }
         }
     }
-    delay(800L)     // установим задержку, чтобы несколько файлов загрузились
-    println("Надоело ждать, пока все файлы загрузятся. Прерву-ка я загрузку...")
-    downloader.cancel()    // отменяем корутину
-    downloader.join()      // ожидаем завершения корутины (в данном случае эта строчка кода никак не повлияет на результата потому что операция не ресурсозатратная)
-    println("Работа программы завершена")
+    delay(250)
+    println("canceling coroutine")
+    job.cancel()
 }
 
 /**
- * CancelAndJoin() нужен для того чтобы подождать пока завершится корутина. В офф доке есть пример где эта строчка кода заставляет ждать пока выполнится
- * finaly блок у try-catch. https://kotlinlang.org/docs/cancellation-and-timeouts.html#closing-resources-with-finally
+ * После того, как выполнился cancel и job корутины перешел в состояние isActive == false - вызов любой функции приведет к выбросу cancellation exception.
+ * Поэтому если необходимо выполнить некоторый suspend код (например в блоке else clenUp operations) - оборачиваем все это дело в
+ * withContext(NonCancelable)
  * */
-
-/**
- * Методы cancel() и join() можно заменить одним методом - cancelAndJoin()
- * */
-
-/**
- * Обработка исключения CancellationException
- * Все suspend-функции в пакете kotlinx.coroutines являются прерываемыми (cancellable).
- * Это значит, что они проверяют, прервана ли корутина. И если ее выполнение прервано, они генерируют исключение типа CancellationException.
- * И в самой корутине мы можем перехватить это исключение, чтобы обработать отмену корутины.
- * Именно поэтому в данном случае не нужно делать проверку на isActive.
- *
- * Обработать внешнее прирывание операции можно следующим образом:
- * */
-
-suspend fun catchExternalCancellationInLaunch() = coroutineScope {
-    val downloader: Job = launch {
-        try {
-            println("Начинаем загрузку файлов")
-            for (i in 1..5) {
-                println("Загружен файл $i")
-                delay(500L)
+suspend fun cancellationExample1_4() = coroutineScope {
+    val job = launch {
+        repeat(10) { index ->
+            if (isActive) {
+                delay(1)
+                println("operation number $index")
+                Thread.sleep(100)
+            } else {
+                //perform cleanup operations
+                withContext(NonCancellable){
+                    delay(100)
+                    println("Clean up")
+                }
+                throw CancellationException()
             }
-        } catch (e: CancellationException) {
-            println("Загрузка файлов прервана потому что ${e.message}")
-        } finally {
-            println("Загрузка завершена")
         }
     }
-    delay(800L)
-    println("Надоело ждать. Прерву-ка я загрузку...")
-    downloader.cancelAndJoin()    // отменяем корутину и ожидаем ее завершения
-    println("Работа программы завершена")
+    delay(250)
+    println("canceling coroutine")
+    job.cancel()
 }
 
 /**
- * Если в примере выше в блоке finally вызвать какую cancelable функцию - например delay - она вызовет cancelable exception внутри finally.
- * Из-за этого может не выполнится некоторая работа которую мы ожидаем. Чтобы этого не произошло можно обернуть выполняемый внутри finaly код
- * withContext(NonCancellable)
- * */
-
-/**
- * Подобным образом можно отменять выполнение и корутин, создаваемых с помощью функции async().
- * В этом случае обычно вызов метода await() помещается в блок try
- * */
-
-suspend fun catchExternalCancellationInAsync() = coroutineScope {
-
-    // создаем и запускаем корутину
-    val message = async {
-        getMessage2()
-    }
-    // отмена корутины
-    message.cancelAndJoin()
-
-    try {
-        // ожидаем получение результата
-        println("message: ${message.await()}")
-    } catch (e: CancellationException) {
-        println("Coroutine has been canceled")
-    }
-    println("Program has finished")
-}
-
-suspend fun getMessage2(): String {
-    delay(500L)
-    return "Hello"
-}
-
-/**
- * Отмена родительского scope отменяет все дочерние.
- * Отмена рядового job не влияет на его siblings
- * */
-
-/**
- * Существует 2 типа suspend функций: обычные и отменяемые.
- * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
- * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
- * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
- * */
-
-
-/**
+ * TimeOut
  * Есть специальная функция которая генерит наследника cancelation exception если выполнение корутины занимает больше по времени, чем наши ограничения.
  * Есть аналог который возвращает вместо CancelationException - null (withTimeoutOrNull())
  * */
-suspend fun timeOutExample() = coroutineScope {
+suspend fun cancellationExample2() = coroutineScope {
     launch {
         withTimeout(1300L) {
             repeat(1000) { i ->
@@ -143,3 +130,22 @@ suspend fun timeOutExample() = coroutineScope {
     }
 }
 
+
+//join + cancelAndJoin
+
+/**
+ * CancelAndJoin() нужен для того чтобы подождать пока завершится корутина. В офф доке есть пример где эта строчка кода заставляет ждать пока выполнится
+ * finaly блок у try-catch. https://kotlinlang.org/docs/cancellation-and-timeouts.html#closing-resources-with-finally
+ *
+ *
+ * cancelable
+ *
+ * состояния
+ *
+ * /**
+ * Существует 2 типа suspend функций: обычные и отменяемые.
+ * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
+ * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
+ * в случае отмены. Подробности можно посмотреть здесь https://startandroid.ru/ru/courses/kotlin/29-course/kotlin/611-urok-16-korutiny-otmena-kak-oshibka.html
+ * */
+ * */
