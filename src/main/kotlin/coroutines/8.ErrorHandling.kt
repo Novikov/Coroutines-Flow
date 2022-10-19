@@ -17,10 +17,6 @@ suspend fun main() {
     errorExample5_4()
 }
 
-/**
- * Лучшее объяснение обработки ошибок можно посмотреть здесь https://www.lukaslechner.com/why-exception-handling-with-kotlin-coroutines-is-so-hard-and-how-to-successfully-master-it/
- * */
-
 /** #1 try catch
  * try-catch не отработает за пределами launch из-за особенностей structured concurrency
  * */
