@@ -54,14 +54,14 @@ suspend fun cancellationExample1_1() = coroutineScope {
 
 /**
  * Способы остановки работы внутри корутины
- * 1.Вызов suspend функций ensureActive(), yield(), delay() или любая другая suspend function. Task - Посмотреть разницу между данными функциями
+ * 1.Вызов suspend функций ensureActive(), yield(), delay(). Не уверен что токое поведение имеют все suspend функции. В лекции услышал что delay() стоит в одном ряду с join() await() и lock()
  * 2.Проверка состояния корутины с помощью оборота всего блока в if(isActive)
  * */
 
 suspend fun cancellationExample1_2() = coroutineScope {
     val job = launch {
         repeat(10) { index ->
-            yield()
+            ensureActive()
             delay(1)
             println("operation number $index")
             Thread.sleep(100)
@@ -180,6 +180,10 @@ suspend fun cancellationExample3() = coroutineScope{
  * 1)Проверка на статус и локальный return
  * 2)Выбросить cancellation exception
  * 3)EnsureActive()/yield()
+ *
+ * Опции определить отмену корутины
+ * 1)Try-catch - отловить отмену локально
+ * 2)InvokeOnCompletion - отловить общую отмену корутины / скоупа.
  * */
 
  /**
