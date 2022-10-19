@@ -155,6 +155,11 @@ suspend fun cancellationExample3() = coroutineScope{
             println("job: I'm running finally")
         }
     }
+
+    job.invokeOnCompletion {
+        println("Coroutine has been canceled")
+    }
+
     delay(1300L) // delay a bit
     println("main: I'm tired of waiting!")
     job.cancel()
