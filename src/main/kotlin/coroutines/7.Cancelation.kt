@@ -1,6 +1,7 @@
 package coroutines
 
 import kotlinx.coroutines.*
+import java.lang.Exception
 
 suspend fun main() {
 //    cancellationExample1()
@@ -9,7 +10,8 @@ suspend fun main() {
 //    cancellationExample1_3()
 //    cancellationExample1_4()
 //    cancellationExample2()
-    cancellationExample3()
+//    cancellationExample3()
+    cancellationExample3_1()
 }
 
 /**
@@ -108,7 +110,7 @@ suspend fun cancellationExample1_4() = coroutineScope {
                 Thread.sleep(100)
             } else {
                 //perform cleanup operations
-                withContext(NonCancellable){
+                withContext(NonCancellable) {
                     delay(100)
                     println("Clean up")
                 }
@@ -144,7 +146,7 @@ suspend fun cancellationExample2() = coroutineScope {
  * Блок finally выполнится только после перехода в состояния canceled.
  * */
 
-suspend fun cancellationExample3() = coroutineScope{
+suspend fun cancellationExample3() = coroutineScope {
     val job = launch {
         try {
             repeat(1000) { i ->
@@ -170,6 +172,23 @@ suspend fun cancellationExample3() = coroutineScope{
     println("main: Now I can quit.")
 }
 
+suspend fun cancellationExample3_1() = coroutineScope {
+    val job = launch {
+        try {
+            repeat(1000) { i ->
+                println("job: I'm sleeping $i ...")
+                delay(500L)
+            }
+        } catch (ex: Exception) {
+            throw ex // если отлавливаем cancellation exception чтоб очисть какие-то ресурсы - не забываем прокинуть его дальше чтобы функции выше по иерархии перестали делать лишнюю работу.
+        }
+    }
+    delay(1300L) // delay a bit
+    println("main: I'm tired of waiting!")
+    job.cancelAndJoin()
+    println("main: Now I can quit.")
+}
+
 /**
  * Способы отмены корутины:
  * 1)Если вызвать cancel на scope - отменяются все дочерние job и его более нельзя использовать для запуска корутин.
@@ -186,7 +205,7 @@ suspend fun cancellationExample3() = coroutineScope{
  * 2)InvokeOnCompletion - отловить общую отмену корутины / скоупа.
  * */
 
- /**
+/**
  * Существует 2 типа suspend функций: обычные и отменяемые.
  * Первая создается через suspendCoroutine билдер и не реагируют на отмену корутины. Насколько я понял речь идет о launch.
  * Вторая создается через suspendCancellableCoroutine и имеет внутренний колбэк для прекращения работы suspend фукнции который вызовется
