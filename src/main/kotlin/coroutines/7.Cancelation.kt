@@ -31,7 +31,7 @@ suspend fun cancellationExample1() = coroutineScope {
 /**
  * Если заменить delay внутри launch на Thread sleep, то отмена не произойдет. Причина в том, что если вызывается suspend функция (например delay)
  * на coroutine scope который уже в состоянии cancelling то будет брошен особый CancellationException, который прервет выполнение корутины.
- * Данный Exception обрабатывать не обязательно, но можно если надо. В примере ниже нет suspend функции поэтоу выполнение не прервется.
+ * Данный Exception обрабатывать не обязательно, но можно если надо. В примере ниже нет suspend функции поэтому выполнение не прервется.
  * Все suspend функции в библиотеке корутин - cancelable (генерят Cancellation exception если job isActive == false)
  * */
 suspend fun cancellationExample1_1() = coroutineScope {
@@ -67,7 +67,9 @@ suspend fun cancellationExample1_2() = coroutineScope {
     job.cancel()
 }
 
-/*** Данный способ имеет преимущество в том, что не выбрасывает мгновенно cancellation exception и позволяет выполнить некоторые cleanUp operations */
+/*** Данный способ имеет преимущество в том, что не выбрасывает мгновенно cancellation exception и позволяет выполнить некоторые cleanUp operations
+ * В обычных тредах есть нечто похожее. Метод interrupt() перевод флаг isInterrupted в положение true, на который мы должны завязываться.
+ * */
 suspend fun cancellationExample1_3() = coroutineScope {
     val job = launch {
         repeat(10) { index ->
@@ -136,9 +138,6 @@ suspend fun cancellationExample2() = coroutineScope {
 /**
  * CancelAndJoin() нужен для того чтобы подождать пока завершится корутина. В офф доке есть пример где эта строчка кода заставляет ждать пока выполнится
  * finaly блок у try-catch. https://kotlinlang.org/docs/cancellation-and-timeouts.html#closing-resources-with-finally
- *
- *
- * cancelable
  *
  * состояния
  *
