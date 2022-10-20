@@ -216,9 +216,13 @@ suspend fun errorExample5() = coroutineScope {
 
 /**
  * CoroutineScope
- * Try-Catch не должен перехватывать exception если он расположен над coroutine билдером, но в случае с coroutine scope это правило н работает.
- * Coroutine scope повтороно генерирует исключение своих дочерних элементов вместо того, чтобы прокидывать их вверх по иерархии, что позволяет ловить
- * его с помощью try-catch за пределами scope.
+ * Try-Catch не должен перехватывать exception если он расположен над coroutine билдером, но в случае с coroutine scope это правило не работает.
+ * Coroutine scope повторно генерирует исключение своих дочерних элементов вместо того, чтобы прокидывать их вверх по иерархии, что позволяет ловить
+ * его с помощью try-catch за пределами scope. Если заменить coroutineScope на supervisorScope, то rethrow не произойдет. SupervisorScope создает новый
+ * независимый scope в иерархии.
+ *
+ * Исключение: supervisorScope сделает rethrow только если внутри функции оно бросается напрямую. Без launch и async. Тогда его токже можно будет поймать вне
+ * supervisorScope с помощью try/catch.
  * */
 suspend fun errorExample5_1() {
     val topLevelScope = CoroutineScope(Job())
