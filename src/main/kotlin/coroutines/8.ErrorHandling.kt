@@ -10,11 +10,12 @@ suspend fun main() {
 //    errorExample2_1()
 //    errorExample4()
 //    errorExample4_1()
+    errorExample4_2()
 //    errorExample5()
 //    errorExample5_1()
 //    errorExample5_2()
 //    errorExample5_3()
-    errorExample5_4()
+//    errorExample5_4()
 }
 
 /** #1 try catch
@@ -160,6 +161,28 @@ suspend fun errorExample4_1() = coroutineScope {
             throw RuntimeException("RuntimeException in async coroutine")
         }
     }
+    Thread.sleep(100)
+}
+
+/**
+ * Но если у нас дочерний async внутри async то исключение не бросится. В данном случае нужно вызывать await на parent deffered и оборачивать внутренности в
+ * try/catch. Именно внутренности а не вызов await. Если мы обернем await() исключение не обработается.
+ * */
+suspend fun errorExample4_2() = coroutineScope {
+
+    val parendDeffered = async {
+        async {
+            try {
+                throw RuntimeException("RuntimeException in async coroutine")
+            } catch (ex: Exception) {
+                println("$ex has been caught")
+
+            }
+
+        }
+    }
+    parendDeffered.await()
+
     Thread.sleep(100)
 }
 
