@@ -112,3 +112,12 @@ private fun blockingTest() {
 
     println("onRun, end")
 }
+
+/**
+ * Structured concurrency это набор принципов работы с асинхронщиной:
+ * 1)Every coroutine needs to be started in a logical scope with limited life-time.
+ * 2)Coroutines started in the same scope from a hierarchy.
+ * 3)A parent job won't complete, until all of its children completed.
+ * 4)Canceling a parent will cancel all children. Canceling a child won't cancel the parent or siblings.
+ * 5)If a child coroutine fails, the exception propagated upwards and depending on the job type, either all siblings are canceled or not.
+ * */
