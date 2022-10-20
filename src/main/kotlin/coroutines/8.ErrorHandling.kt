@@ -99,8 +99,8 @@ suspend fun errorExample2_1() {
  * Normally, the handler is used to log the exception, show some kind of error message, terminate, and/or restart the application
  *
  * Use try/catch if you want to retry the operation or do other actions before the Coroutine completes.
- * Keep in mind that by catching the exception directly in the Coroutine, it isn’t propagated up the job hierarchy and you aren’t making use of the cancellation functionality of Structured Concurrency.
- * Use the CoroutineExceptionHandler for logic that should happen after the coroutine already completed.
+ * Нужно помнить, что если одну из корутин оборачиваем в try/catch то брошенный exception не повлияет на работу другой корутины, что есть нарушение
+ * structured concurrency. Если мы хотим, чтобы при exception в одной из корутин - ее siblings отменилась - используем coroutineExceptionHandler.
  * */
 
 
