@@ -8,8 +8,8 @@ import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    withoutCoroutines()
-//    withCoroutines()
-    lostCoroutineExample()
+    withCoroutines()
+//    lostCoroutineExample()
 }
 
 suspend fun withoutCoroutines() {
