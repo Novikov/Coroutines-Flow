@@ -6,10 +6,11 @@ suspend fun main() {
 //    coroutineScopeExample()
 //    coroutineScopeExample2()
 //    coroutineScopeExample3()
+    coroutineScopeExample3_1()
 //    coroutineScopeExample4()
 //    coroutineScopeExample5()
 //    coroutineScopeExample6()
-    coroutineScopeExample7()
+//    coroutineScopeExample7()
 }
 
 /**
@@ -57,6 +58,26 @@ fun coroutineScopeExample3() {
     runBlocking {
         launch {
             for (i in 0..5) {
+                delay(400L)
+                println(i)
+            }
+        }
+    }
+    println("Hello Coroutines")
+}
+
+/** Но нужно помнить, что runBlocking блокирует только поток выполнения пока не выполнится. Корутины внутри потока не блокирует.*/
+fun coroutineScopeExample3_1() {
+    runBlocking {
+        launch {
+            for (i in 0..5) {
+                delay(400L)
+                println(i)
+            }
+        }
+
+        launch {
+            for (i in 5..10) {
                 delay(400L)
                 println(i)
             }
