@@ -4,8 +4,8 @@ import kotlinx.coroutines.*
 
 suspend fun main() {
 //    coroutineScopeExample()
-//    coroutineScopeExample2()
-    coroutineScopeExample3()
+    coroutineScopeExample2()
+//    coroutineScopeExample3()
 }
 
 /**
@@ -19,29 +19,30 @@ suspend fun main() {
  * Одной из функций является coroutineScope. Она может применяться к любой функции, например:
  * */
 
-suspend fun coroutineScopeExample() = coroutineScope {
-    launch {
+suspend fun coroutineScopeExample() {
+    val scope = CoroutineScope(Job())
+   val jobInstance =  scope.launch {
         for (i in 0..5) {
             println(i)
             delay(400L)
         }
     }
     println("Hello Coroutines")
-    println("${this.coroutineContext[Job]}") // распечатать ссылку на job из текущего scope.
+    println("${scope.coroutineContext[Job]} $jobInstance") // распечатать ссылку на job из текущего scope и parent корутины
 }
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
  * Время жизни данного scope соответствует времени жизни приложения. Его нужно избегать. Отменить его можно только вручную.
  * */
 suspend fun coroutineScopeExample2() {
-    val job = GlobalScope.launch {
+    val jobInstance = GlobalScope.launch {
         for (i in 0..5) {
             println(i)
             delay(400L)
         }
     }.join()
     println("Hello Coroutines")
-    println("${GlobalScope.coroutineContext[Job]}") // убедиться что нет job можно вот так
+    println("${GlobalScope.coroutineContext[Job]} $jobInstance") // распечатать ссылку на job из текущего scope и parent корутины
 }
 
 /**

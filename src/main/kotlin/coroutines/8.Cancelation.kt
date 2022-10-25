@@ -1,7 +1,6 @@
 package coroutines
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.NonCancellable.cancel
 import java.lang.Exception
 import kotlin.coroutines.suspendCoroutine
 
