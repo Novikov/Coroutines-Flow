@@ -3,34 +3,28 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-    asyncExample1()
-//    asyncValueExample()
-//    tripleAsync()
-//    lazyAsync()
+//    asyncExample1()
+//    asyncExample2()
+//    asyncExample3()
+    asyncExample4()
 }
 
 /** async запускает отдельную корутину, которая выполняется параллельно с остальными корутинами. Тоже самое что и Launch*
  * Тут важно запомнить что async всеровно начнет выполнение и без await(). Await - это аналог join но только для того, чтобы вернуть результат.
+ * Интерфейс Deferred унаследован от интерфейса Job, поэтому для также доступны весь функционал, определенный для интерфейса Job
  * */
 suspend fun asyncExample1() {
-    coroutineScope {
-        async {
-            delay(5000L)  // имитация продолжительной работы
-            println("Hello work!")
-        }
+    val scope = CoroutineScope(Job())
+    val deferred = scope.async {
+        delay(500L)  // имитация продолжительной работы
+        println("Hello work!")
     }
-
+    deferred.join() //Так же может использоваться потому что deferred наследник job
     println("Program has finished")
 }
 
-/**
- * Кроме того, async-корутина возвращает объект Deferred, который ожидает получения результата корутины.
- * (Интерфейс Deferred унаследован от интерфейса Job, поэтому для также доступны весь функционал, определенный для интефейса Job)
- * Для получения результата из объекта Deferred применяется функция await().
- * */
-
-suspend fun asyncValueExample() = coroutineScope {
-
+/** Для получения результата из объекта Deferred применяется функция await(). */
+suspend fun asyncExample2() = coroutineScope {
     val message: Deferred<String> = async { getMessage() }
     println("message: ${message.await()}")
     println("Program has finished")
@@ -41,11 +35,8 @@ suspend fun getMessage(): String {
     return "Hello"
 }
 
-
-/**
- * Мы можем с помощью async запустить несколько корутин, которые будут выполняться параллельно.
- * */
-suspend fun tripleAsync() = coroutineScope {
+/** С помощью async можно запустить несколько корутин, которые будут выполняться параллельно */
+suspend fun asyncExample3() = coroutineScope {
 
     val numDeferred1 = async { sum(1, 2) }
     val numDeferred2 = async { sum(3, 4) }
@@ -69,12 +60,10 @@ suspend fun sum(a: Int, b: Int): Int {
  * но также и с помощью метода await() при обращении к результу корутины
  * */
 
-suspend fun lazyAsync() = coroutineScope {
-
+suspend fun asyncExample4() = coroutineScope {
     // корутина создана, но не запущена
     val sum = async(start = CoroutineStart.LAZY) { sumLazy(1, 2) }
-
-    //    sum.start()                      // запуск корутины
+//    sum.start()                      // запуск корутины, если необходимо начать выполнение до вызова await()
     delay(1000L)
     println("Actions after the coroutine creation")
     println("sum: ${sum.await()}")   // запуск и выполнение корутины
@@ -84,5 +73,3 @@ fun sumLazy(a: Int, b: Int): Int {
     println("Coroutine has started")
     return a + b
 }
-
-// Если необходимо, чтобы корутина еще до метода await() начала выполняться, то можно вызвать метод start()
