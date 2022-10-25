@@ -4,8 +4,11 @@ import kotlinx.coroutines.*
 
 suspend fun main() {
 //    coroutineScopeExample()
-    coroutineScopeExample2()
+//    coroutineScopeExample2()
 //    coroutineScopeExample3()
+//    coroutineScopeExample4()
+//    coroutineScopeExample5()
+    coroutineScopeExample6()
 }
 
 /**
@@ -21,7 +24,7 @@ suspend fun main() {
 
 suspend fun coroutineScopeExample() {
     val scope = CoroutineScope(Job())
-   val jobInstance =  scope.launch {
+    val jobInstance = scope.launch {
         for (i in 0..5) {
             println(i)
             delay(400L)
@@ -59,4 +62,99 @@ fun coroutineScopeExample3() {
         }
     }
     println("Hello Coroutines")
+}
+
+/**
+ * CoroutineScope билдер.
+ * Ниже есть поведение которого мы можем добиться с помощью coroutineScope билдера, что сделано в coroutineScopeExample5.
+ * Т.е дочерние корутины
+ * */
+fun coroutineScopeExample4() {
+    val scope = CoroutineScope(Job())
+    scope.launch {
+        val job1 = launch {
+            println("Start task 1")
+            delay(300)
+            println("End task 1")
+        }
+        val job2 = launch {
+            println("Start task 2")
+            delay(200)
+            println("End task 2")
+        }
+
+        job1.join()
+        job2.join()
+
+        val job3 = scope.launch {
+            println("Start task 3")
+            delay(100)
+            println("End task 3")
+        }
+    }
+
+    Thread.sleep(2000)
+}
+
+/**
+ * Есть еще другой вариант - поместить task1 и task2 в launch и вызывать на нем join() до выполнения task3.
+ * Данный scope отдаст управление на task3 только когда все его child будут завершены. Т.е теряется конкурентное поведение.
+ * В случае выброса exception launch 1,2 и 3 будут отменены.
+ * */
+suspend fun coroutineScopeExample5() {
+    val scope = CoroutineScope(Job())
+    scope.launch {
+        coroutineScope {
+            launch {
+                println("Start task 1")
+                delay(100)
+                throw Exception()
+                println("End task 1")
+            }
+            launch {
+                println("Start task 2")
+                delay(200)
+                println("End task 2")
+            }
+        }
+
+        val job3 = launch {
+            println("Start task 3")
+            delay(300)
+            println("End task 3")
+        }
+    }
+
+    Thread.sleep(2000)
+}
+
+/**
+ * SupervisorScope builder
+ * Исключение бросится, но launch2 и launch3 продолжат свое выполнение
+ * */
+suspend fun coroutineScopeExample6() {
+    val scope = CoroutineScope(Job())
+    scope.launch {
+        supervisorScope {
+            launch {
+                println("Start task 1")
+                delay(100)
+                throw Exception()
+                println("End task 1")
+            }
+            launch {
+                println("Start task 2")
+                delay(200)
+                println("End task 2")
+            }
+        }
+
+        val job3 = launch {
+            println("Start task 3")
+            delay(300)
+            println("End task 3")
+        }
+    }
+
+    Thread.sleep(2000)
 }
