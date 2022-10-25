@@ -7,10 +7,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
-//    routineExample()
+    routineExample()
 //    coroutineExample()
 //    suspendApiCallExample()
-    blockingCoroutinesExample()
+//    blockingCoroutinesExample()
 }
 
 /**
