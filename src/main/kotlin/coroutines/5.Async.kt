@@ -3,23 +3,23 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-    asyncExample()
+    asyncExample1()
 //    asyncValueExample()
 //    tripleAsync()
 //    lazyAsync()
 }
 
 /** async запускает отдельную корутину, которая выполняется параллельно с остальными корутинами. Тоже самое что и Launch*
- *
- * !!! Тут важно запомнить что async всеровно начнет выполнение и без await(). Await - это аналог join но только для того, чтобы вернуть результат.
- *
+ * Тут важно запомнить что async всеровно начнет выполнение и без await(). Await - это аналог join но только для того, чтобы вернуть результат.
  * */
-suspend fun asyncExample() = coroutineScope {
-
-    async {
-        delay(500L)  // имитация продолжительной работы
-        println("Hello work!")
+suspend fun asyncExample1() {
+    coroutineScope {
+        async {
+            delay(5000L)  // имитация продолжительной работы
+            println("Hello work!")
+        }
     }
+
     println("Program has finished")
 }
 

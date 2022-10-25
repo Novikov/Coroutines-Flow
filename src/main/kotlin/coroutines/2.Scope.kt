@@ -8,7 +8,8 @@ suspend fun main() {
 //    coroutineScopeExample3()
 //    coroutineScopeExample4()
 //    coroutineScopeExample5()
-    coroutineScopeExample6()
+//    coroutineScopeExample6()
+    coroutineScopeExample7()
 }
 
 /**
@@ -157,4 +158,19 @@ suspend fun coroutineScopeExample6() {
     }
 
     Thread.sleep(2000)
+}
+
+/**
+ * coroutineScope, как и supervisorScope билдеры с вызыванным join() по умолчанию. Код ниже будет ждать пока он перейдет в состояние completed
+ * (когда выполнится все внутри и то что ниже)
+ * */
+suspend fun coroutineScopeExample7() {
+    coroutineScope {
+        launch {
+            delay(5000L)  // имитация продолжительной работы
+            println("Hello work!")
+        }
+    }
+
+    println("Program has finished")
 }
