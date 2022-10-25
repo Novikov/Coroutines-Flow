@@ -6,9 +6,9 @@ suspend fun main() {
 //    launchExample1()
 //    launchExample2()
 //    launchExample3()
-    launchExample4()
-//    asyncEmulationExample()
-//    parentLaunchWaitsNestedExample()
+//    launchExample4()
+//    launchExample5()
+    launchExample6()
 }
 
 /**
@@ -107,7 +107,7 @@ suspend fun launchExample4() = coroutineScope {
  * то время работы увеличится потому что вторая корутина будет ждать выполнения первой.
  * */
 
-suspend fun asyncEmulationExample() = coroutineScope {
+suspend fun launchExample5() = coroutineScope {
 
     val startTime = System.currentTimeMillis()
     val resultList = mutableListOf<Int>()
@@ -137,8 +137,7 @@ suspend fun asyncEmulationExample() = coroutineScope {
 /**
  * Способ заставить parent launch подождать выпполнения дочерних корутин
  * */
-
-suspend fun parentLaunchWaitsNestedExample() {
+suspend fun launchExample6() {
     val scope = CoroutineScope(Dispatchers.Default)
 
     val parentCoroutineJob = scope.launch {
@@ -151,8 +150,6 @@ suspend fun parentLaunchWaitsNestedExample() {
             println("Child coroutine 2 has completed")
         }
     }
-
-//    parentCoroutineJob.join() заставляет parent launch подождать
-
+    parentCoroutineJob.join() //заставляет parent launch подождать
     println("Parent coroutine has been completed")
 }
