@@ -3,7 +3,8 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-    launchExample1()
+//    launchExample1()
+    launchExample2()
 //    joinLaunchExample()
 //    lazyLaunchExample()
 //    asyncEmulationExample()
@@ -29,10 +30,11 @@ suspend fun launchExample1() = coroutineScope {
 }
 
 /**
- * launch билдер возвращает объект job. Вызов join() по ссылке job заставит подождать выполенения блока кода внутри launch для всего что ниже join()
+ * launch билдер возвращает объект job. Вызов join() по ссылке job заставит подождать кода ниже до тех пор пока job выше, на котором произошел вызов не перейдет
+ * в состояние completed.
  * */
 
-suspend fun joinLaunchExample() = coroutineScope {
+suspend fun launchExample2() = coroutineScope {
 
     val job = launch {
         for (i in 1..5) {
