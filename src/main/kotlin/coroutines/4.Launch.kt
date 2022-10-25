@@ -3,11 +3,11 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-//    launchExample()
+    launchExample1()
 //    joinLaunchExample()
 //    lazyLaunchExample()
 //    asyncEmulationExample()
-    parentLaunchWaitsNestedExample()
+//    parentLaunchWaitsNestedExample()
 }
 
 /**
@@ -15,7 +15,7 @@ suspend fun main() {
  * когда нам не надо возвращать результат из корутины и когда нам ее надо выполнять одновременно с другим кодом.
  * */
 
-suspend fun launchExample() = coroutineScope {
+suspend fun launchExample1() = coroutineScope {
 
     launch {
         for (i in 1..5) {
@@ -50,7 +50,7 @@ suspend fun joinLaunchExample() = coroutineScope {
  * Запуск нескольких корутин.
  * Подобным образом можно запускать в одной функции сразу несколько корутин. И они будут выполняться одновременно.
  * Попробуй запустить с join и без него в разных вариациях.
- * Понимание join() - подождать выполнения того что внутри launch для кода что ниже
+ * Понимание join() - код ниже подождет, пока job выше, на котором вызван join() перейдет в состояние completed.
  * */
 
 suspend fun multipleCoroutines() = coroutineScope {

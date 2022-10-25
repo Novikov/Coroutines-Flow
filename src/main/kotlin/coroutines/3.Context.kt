@@ -50,7 +50,7 @@ suspend fun coroutineContextExample1() {
 
             launch {
                 withContext(Dispatchers.IO) {
-                    println("coroutine, level3, ${contextToString(this.coroutineContext)}")
+                    println("coroutine, level3, ${contextToString(coroutineContext)}")
                 }
             }
         }
