@@ -5,25 +5,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 suspend fun main() {
-//    nestedCoroutineExample()
+    nestedCoroutineExample1()
 //    parentWaitChildExample()
 //    parallelWorkExample()
-    relationBetweenParentAndChild()
+//    relationBetweenParentAndChild()
 }
 
 /*** Launch билдер создает свой внутренний scope.
  * Родительская корутина выполнила весь свой код не дожидаясь выполнения дочерней. А дочерняя корутина в отдельном потоке выполнила свой код.
- * Хоть родительская корутина и выполнила сразу же весь свой код, но ее статус поменяется на Завершена только когда выполнится дочерняя корутина.
+ * Хоть родительская корутина и выполнила сразу же весь свой код, но ее статус поменяется на Completed только когда выполнится дочерняя корутина.
  * */
-suspend fun nestedCoroutineExample() = coroutineScope {
+suspend fun nestedCoroutineExample1() = coroutineScope {
     launch {
-        println("Outer coroutine start")
+        println("Outer coroutine start ${Thread.currentThread().name}")
         launch {
-            println("Inner coroutine start")
+            println("Inner coroutine start ${Thread.currentThread().name}")
             delay(400L)
-            println("Inner coroutine end")
+            println("Inner coroutine end ${Thread.currentThread().name}")
         }
-        println("Outer coroutine end")
+        println("Outer coroutine end ${Thread.currentThread().name}")
     }
 }
 
