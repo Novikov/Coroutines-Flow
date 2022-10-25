@@ -4,9 +4,9 @@ import kotlinx.coroutines.*
 
 suspend fun main() {
 //    launchExample1()
-    launchExample2()
-//    joinLaunchExample()
-//    lazyLaunchExample()
+//    launchExample2()
+//    launchExample3()
+    launchExample4()
 //    asyncEmulationExample()
 //    parentLaunchWaitsNestedExample()
 }
@@ -31,7 +31,7 @@ suspend fun launchExample1() = coroutineScope {
 
 /**
  * launch билдер возвращает объект job. Вызов join() по ссылке job заставит подождать кода ниже до тех пор пока job выше, на котором произошел вызов не перейдет
- * в состояние completed.
+ * в состояние completed (т.е выполнится все внутри и дочерниие корутинын).
  * */
 
 suspend fun launchExample2() = coroutineScope {
@@ -52,10 +52,10 @@ suspend fun launchExample2() = coroutineScope {
  * Запуск нескольких корутин.
  * Подобным образом можно запускать в одной функции сразу несколько корутин. И они будут выполняться одновременно.
  * Попробуй запустить с join и без него в разных вариациях.
- * Понимание join() - код ниже подождет, пока job выше, на котором вызван join() перейдет в состояние completed.
+ * Понимание join() - код ниже подождет, пока job выше, на котором вызван join() перейдет в состояние completed (т.е когда выполнится все внутри + дочерние корутины)
  * */
 
-suspend fun multipleCoroutines() = coroutineScope {
+suspend fun launchExample3() = coroutineScope {
     launch {
         for (i in 0..5) {
             delay(400L)
@@ -79,7 +79,7 @@ suspend fun multipleCoroutines() = coroutineScope {
  * Для установки отложенного запуска в функцию launch() передается значение start = CoroutineStart.LAZY
  * */
 
-suspend fun lazyLaunchExample() = coroutineScope {
+suspend fun launchExample4() = coroutineScope {
 
     // корутина создана, но не запущена
     val job = launch(start = CoroutineStart.LAZY) {
@@ -131,7 +131,7 @@ suspend fun asyncEmulationExample() = coroutineScope {
 
     val endTime = System.currentTimeMillis() - startTime
 
-    println("coroutine end with time - $endTime and result list - $resultList" )
+    println("coroutine end with time - $endTime and result list - $resultList")
 }
 
 /**
