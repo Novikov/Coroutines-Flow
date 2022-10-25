@@ -61,3 +61,14 @@ suspend fun passingContextDataAtCoroutineCreation() {
 
     delay(2000)
 }
+
+/**
+ * withContext() используется, чтобы изменить контекст для определенного участка кода.
+ * Например, мы выполняем ресурсозатратные вычисления на viewModelScope. По умолчанию данный scope использует Dispatcher UI потока.
+ * UI поток начнет фризиться. Чтобы этого не произошло, берем оборачиваем участок кода, отвечающий за вычисления с помощью withContext(Dispatcher.Default)
+ */
+suspend fun withContextExample() {
+    withContext(Dispatchers.Default) {
+        // calculations
+    }
+}
