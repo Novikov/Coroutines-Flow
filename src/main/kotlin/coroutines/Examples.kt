@@ -3,8 +3,8 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-//    example1()
-    example2()
+    example1()
+//    example2()
 }
 
 /**
@@ -12,13 +12,13 @@ suspend fun main() {
  * Но a напечатается быстрее end просто потому что launch отрабатывает быстрее чем родительская корутина.
  * Если туда добавить delay то родительская корутина отработает быстрее. Но нужно помнить, что если родительскаяа корутина отработала быстрее
  * это не значит что она отменена.
+ *
+ * Обсудить
  * */
 suspend fun example1() = coroutineScope {
     launch {
         println("start")
-        launch {
-            println("a")
-        }
+        launch { println("a") }
         launch { println("b") }
         println("end")
     }
