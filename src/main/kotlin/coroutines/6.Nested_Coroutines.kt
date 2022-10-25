@@ -5,8 +5,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 suspend fun main() {
-    nestedCoroutineExample1()
-//    parentWaitChildExample()
+//    nestedCoroutineExample1()
+    nestedCoroutineExample2()
 //    parallelWorkExample()
 //    relationBetweenParentAndChild()
 }
@@ -41,7 +41,7 @@ suspend fun nestedCoroutineExample1() = coroutineScope {
  * а код дочерней - в фоновом. Получается, что из main потока мы запустили фоновую работу и подождали ее окончания без каких-либо блокировок и колбэков.
  * join не заблокирует main поток, а только приостановит
  * */
-suspend fun parentWaitChildExample() = coroutineScope {
+suspend fun nestedCoroutineExample2() = coroutineScope {
     launch {
         println("parent coroutine, start")
 
@@ -52,7 +52,7 @@ suspend fun parentWaitChildExample() = coroutineScope {
         }
 
         println("parent coroutine, wait until child completes")
-        job.join()
+        job.join() //в этом случае будет suspend, а не блокировка потока
 
         println("parent coroutine, end")
     }
