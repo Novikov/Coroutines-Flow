@@ -10,12 +10,12 @@ suspend fun main() {
 //    errorExample2_1()
 //    errorExample4()
 //    errorExample4_1()
-    errorExample4_2()
+//    errorExample4_2()
 //    errorExample5()
 //    errorExample5_1()
 //    errorExample5_2()
 //    errorExample5_3()
-//    errorExample5_4()
+    errorExample5_4()
 }
 
 /** #1 try catch
@@ -77,7 +77,7 @@ suspend fun errorExample2() {
 /**
  * 2)Если handler передан в parent coroutine builder. Если мы передадим его в дочернюю корутину - обработка exception не произойдет.
  * */
-suspend fun errorExample2_1() {
+fun errorExample2_1() {
     val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
         println("Handle $exception in CoroutineExceptionHandler")
     }
@@ -106,12 +106,6 @@ suspend fun errorExample2_1() {
 
 
 /**
- * #4 Async
- *
- *
- * */
-
-/** errorExample4
  * Async требует иного способа работы с try-catch.
  *
  * Поведение для top level async
@@ -145,10 +139,6 @@ suspend fun errorExample4() = coroutineScope {
  * Поведение для child async
  * 1)Если async является дочерним билдером то для выброса исключения не требуется вызывать await().
  * 2)В это случае исключение придет в coroutineExceptionHandler
- *
- * Вывод:
- * 1)Вызов launch всегда приведет к попаданию exception в coroutineExceptionHandler не зависимо от того этот launch child или parent.
- * 2)У launch отсутствует await() метод поэтому всегда try-catch всегда используем внутри launch, оборачивая код корутины
  * */
 suspend fun errorExample4_1() = coroutineScope {
     val coroutineExceptionHandler = CoroutineExceptionHandler { coroutineContext, exception ->
@@ -163,6 +153,12 @@ suspend fun errorExample4_1() = coroutineScope {
     }
     Thread.sleep(100)
 }
+
+/**
+ * Вывод:
+ * 1)Вызов launch всегда приведет к попаданию exception в coroutineExceptionHandler не зависимо от того этот launch child или parent.
+ * 2)У launch отсутствует await() метод поэтому try-catch всегда используем внутри launch, оборачивая код корутины
+ * */
 
 /**
  * Но если у нас дочерний async внутри async то исключение не бросится. В данном случае нужно вызывать await на parent deffered и оборачивать внутренности в
@@ -260,6 +256,7 @@ suspend fun errorExample5_2() {
         supervisorScope {
             val job2 = launch {
                 println("starting Coroutine 2")
+                throw Exception()
             }
 
             val job3 = launch {
