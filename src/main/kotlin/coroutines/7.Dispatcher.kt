@@ -8,8 +8,8 @@ import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    checkThread()
-    setDispatcher()
-//    getDataOnUnconfinedDispatcherExample()
+//    setDispatcher()
+    getDataOnUnconfinedDispatcherExample()
 }
 
 
