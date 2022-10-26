@@ -321,3 +321,7 @@ suspend fun errorExample5_4() = coroutineScope {
         }
     }
 }
+
+/**
+ * RunCatching
+ * */
