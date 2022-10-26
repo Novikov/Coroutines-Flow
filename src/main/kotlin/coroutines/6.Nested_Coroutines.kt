@@ -6,9 +6,9 @@ import kotlinx.coroutines.launch
 
 suspend fun main() {
 //    nestedCoroutineExample1()
-    nestedCoroutineExample2()
-//    parallelWorkExample()
-//    relationBetweenParentAndChild()
+//    nestedCoroutineExample2()
+//    nestedCoroutineExample3()
+    nestedCoroutineExample4()
 }
 
 /*** Launch билдер создает свой внутренний scope.
@@ -67,7 +67,7 @@ suspend fun nestedCoroutineExample2() = coroutineScope {
  * В следующем примере показан пример паралельной работы дочерних корутин.
  * Родительская корутина будет их ждать. Общее время выполнения будет 1500
  * */
-suspend fun parallelWorkExample() = coroutineScope {
+suspend fun nestedCoroutineExample3() = coroutineScope {
     launch {
         val begin = System.currentTimeMillis()
         println("parent coroutine, start")
@@ -87,14 +87,13 @@ suspend fun parallelWorkExample() = coroutineScope {
         val end = System.currentTimeMillis()
 
         println("parent coroutine, end")
-
         println("Elapsed time in miliseconds: ${end - begin}")
     }
 }
 
 /** Родительская корутина выполнится первой, но будет иметь статус isActive = true до тех пор пока дочерние корутины выполняются.
  * */
-suspend fun relationBetweenParentAndChild() = coroutineScope {
+suspend fun nestedCoroutineExample4() = coroutineScope {
     val job = launch {
         println("parent start")
         launch {
