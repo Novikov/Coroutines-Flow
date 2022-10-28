@@ -56,6 +56,15 @@ suspend fun coroutine(number: Int, delay: Long) {
 }
 
 /**
+ * Определение из документации
+ * A coroutine is an instance of suspendable computation. It is conceptually similar to a thread, in the sense that it takes a block of code to run
+ * that works concurrently with the rest of the code. However, a coroutine is not bound to any particular thread. It may suspend its execution in one
+ * thread and resume in another one.
+
+* Coroutines can be thought of as light-weight threads, but there is a number of important differences that make their real-life usage very different from threads.
+ * */
+
+/**
  * Любая корутина может выполняться только на coroutineScope. Способы получения scope в 11.Scope_Builders. Scope имеет контекст состоящий из 4 параметров:
  * Job, Dispatcher, ErrorHandler, CoroutineName.*/
 
