@@ -35,7 +35,11 @@ fun routine(number: Int, delay: Long) {
 }
 
 /** В данном случае control flow передастся в coroutine1, но в тот момент когда он дойдет до suspend функции delay - поток выполнения будет отдан для coroutine2
- * coroutine2 запустится до того, выполнится coroutine1*/
+ * coroutine2 запустится до того, выполнится coroutine1
+ *
+ * В этом кроется смысл корутин. Приставка co обозначает cooperative. Т.е возможность одной рутины передавать поток управления для другой пока первая
+ * находится в состоянии suspended.
+ * */
 suspend fun coroutineExample() = coroutineScope {
     println("main starts")
     joinAll(
