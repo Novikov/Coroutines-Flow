@@ -7,8 +7,9 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
-    routineExample()
+//    routineExample()
 //    coroutineExample()
+    suspendExample()
 //    suspendApiCallExample()
 //    blockingCoroutinesExample()
 }
@@ -74,6 +75,23 @@ suspend fun coroutine(number: Int, delay: Long) {
  * suspend обозначает что функция может приостановить свое выполнение и отдать control flow другой функции. После чего suspend может возобновить свое выполнение
  * и завершиться на другом потоке. Корутина выполняющая suspend функцию не привязана к конкретному потоку.
  * */
+
+/** Само по себе слово suspend не делает работу асинхронной*/
+suspend fun suspendExample(){
+    val one = doSomethingUsefulOne()
+    val two = doSomethingUsefulTwo()
+    println("The answer is ${one + two}")
+}
+
+suspend fun doSomethingUsefulOne(): Int {
+    delay(500L) // pretend we are doing something useful here
+    return 13
+}
+
+suspend fun doSomethingUsefulTwo(): Int {
+    delay(1000L) // pretend we are doing something useful here, too
+    return 29
+}
 
 /**
  * Способы реализации асинхронщины в Android:
