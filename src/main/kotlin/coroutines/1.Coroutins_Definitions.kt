@@ -76,15 +76,18 @@ suspend fun coroutine(number: Int, delay: Long) {
  * и завершиться на другом потоке. Корутина выполняющая suspend функцию не привязана к конкретному потоку.
  * */
 
-/** Само по себе слово suspend не делает работу асинхронной*/
+/** Само по себе слово suspend не делает работу асинхронной. Функции будут засыпать на указанное время и выполняться последовательно*/
 suspend fun suspendExample(){
+    val begin = System.currentTimeMillis()
     val one = doSomethingUsefulOne()
     val two = doSomethingUsefulTwo()
     println("The answer is ${one + two}")
+    val end = System.currentTimeMillis()
+    println("time ${end - begin}")
 }
 
 suspend fun doSomethingUsefulOne(): Int {
-    delay(500L) // pretend we are doing something useful here
+    delay(1500L) // pretend we are doing something useful here
     return 13
 }
 
