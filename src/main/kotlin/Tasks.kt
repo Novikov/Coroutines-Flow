@@ -1,5 +1,6 @@
 
 /**
+ * 0)Конспект по многопоточности, deadlock
  * 1)Working with shared state
  * 2)Github example
  * 3)Async/Concurrency

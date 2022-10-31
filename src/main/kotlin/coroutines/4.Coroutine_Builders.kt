@@ -17,6 +17,8 @@ suspend fun main() {
 //    asyncExample3()
 //    asyncExample4()
     asyncExample5()
+
+    /**lazy*/
 }
 
 /**
@@ -239,6 +241,7 @@ suspend fun asyncExample5() = coroutineScope {
     val dataList = idList.toMutableList().map { async { getDataById(it) } }.awaitAll()
     println(dataList)
 }
+
 suspend fun getDataById(id: Int): String {
     delay(100)
     return "Data by id - $id"
