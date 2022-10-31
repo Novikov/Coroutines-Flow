@@ -5,11 +5,13 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.system.measureTimeMillis
 
 suspend fun main() {
 //    routineExample()
 //    coroutineExample()
-    suspendExample()
+//    suspendExample()
+    asynchExample()
 //    suspendApiCallExample()
 //    blockingCoroutinesExample()
 }
@@ -62,7 +64,7 @@ suspend fun coroutine(number: Int, delay: Long) {
  * that works concurrently with the rest of the code. However, a coroutine is not bound to any particular thread. It may suspend its execution in one
  * thread and resume in another one.
 
-* Coroutines can be thought of as light-weight threads, but there is a number of important differences that make their real-life usage very different from threads.
+ * Coroutines can be thought of as light-weight threads, but there is a number of important differences that make their real-life usage very different from threads.
  * */
 
 /**
@@ -77,13 +79,13 @@ suspend fun coroutine(number: Int, delay: Long) {
  * */
 
 /** Само по себе слово suspend не делает работу асинхронной. Функции будут засыпать на указанное время и выполняться последовательно*/
-suspend fun suspendExample(){
-    val begin = System.currentTimeMillis()
-    val one = doSomethingUsefulOne()
-    val two = doSomethingUsefulTwo()
-    println("The answer is ${one + two}")
-    val end = System.currentTimeMillis()
-    println("time ${end - begin}")
+suspend fun suspendExample() {
+    val time = measureTimeMillis {
+        val one = doSomethingUsefulOne()
+        val two = doSomethingUsefulTwo()
+        println("The answer is ${one + two}")
+    }
+    println("time $time")
 }
 
 suspend fun doSomethingUsefulOne(): Int {
@@ -94,6 +96,18 @@ suspend fun doSomethingUsefulOne(): Int {
 suspend fun doSomethingUsefulTwo(): Int {
     delay(1000L) // pretend we are doing something useful here, too
     return 29
+}
+
+/** Пример асинхронного выполнения. */
+suspend fun asynchExample() {
+    val time = measureTimeMillis {
+        coroutineScope {
+            val one = async { doSomethingUsefulOne() }
+            val two = async { doSomethingUsefulTwo() }
+            println("The answer is ${one.await() + two.await()}")
+        }
+    }
+    println("time $time")
 }
 
 /**
