@@ -8,10 +8,10 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.system.measureTimeMillis
 
 suspend fun main() {
-//    routineExample()
+    routineExample()
 //    coroutineExample()
 //    suspendExample()
-    asynchExample()
+//    asynchExample()
 //    suspendApiCallExample()
 //    blockingCoroutinesExample()
 }
@@ -137,7 +137,7 @@ suspend fun getDataFromApi(): Int = suspendCoroutine {
     thread {
         println("suspend function, background work")
         TimeUnit.MILLISECONDS.sleep(1000)
-        it.resume(5) // Возобновление работы корутины. Если не вызвать то корутина не завершится
+        //it.resume(5) // Возобновление работы корутины. Если не вызвать то корутина не завершится
     }
 }
 
