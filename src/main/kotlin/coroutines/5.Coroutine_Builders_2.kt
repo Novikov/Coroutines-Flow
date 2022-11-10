@@ -5,7 +5,8 @@ import kotlin.system.measureTimeMillis
 
 suspend fun main() {
 //    coroutineBuilders2Example1()
-    coroutineBuilders2Example2()
+//    coroutineBuilders2Example2()
+    coroutineBuilders2Example3()
 }
 
 /** Полезная техника маппинга списка через async
@@ -42,4 +43,19 @@ suspend fun coroutineBuilders2Example2() = coroutineScope {
 suspend fun makeRequestByValue(id: Int) {
     delay(1000)
     println("request for id $id")
+}
+
+/** Если мы сделаем 3 корутины с lazy запуском и будем в привычной манере вызывать await - потеряется асинхронное поведение. Время выполнения каждой
+ * корутины будет складываться. Это можно исправить, вызвая на каждом async start до того как вызываем await.*/
+suspend fun coroutineBuilders2Example3() = coroutineScope {
+    val measuredTime = measureTimeMillis {
+        val def1 = async(start = CoroutineStart.LAZY) { getDataById(1) }
+        val def2 = async(start = CoroutineStart.LAZY){ getDataById(2) }
+        val def3 = async(start = CoroutineStart.LAZY){ getDataById(3) }
+//        val def1 = async(start = CoroutineStart.LAZY) { getDataById(1) }.apply { start() }
+//        val def2 = async(start = CoroutineStart.LAZY) { getDataById(2) }.apply { start() }
+//        val def3 = async(start = CoroutineStart.LAZY) { getDataById(3) }.apply { start() }
+        println("val1: ${def1.await()}, val2: ${def2.await()}, val3: ${def3.await()}")
+    }
+    println(measuredTime)
 }

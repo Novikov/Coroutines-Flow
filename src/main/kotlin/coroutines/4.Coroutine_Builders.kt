@@ -4,7 +4,7 @@ import kotlinx.coroutines.*
 
 suspend fun main() {
     /**launch*/
-    launchExample1()
+//    launchExample1()
 //    launchExample2()
 //    launchExample3()
 //    launchExample4()
@@ -15,7 +15,7 @@ suspend fun main() {
 //    asyncExample1()
 //    asyncExample2()
 //    asyncExample3()
-//    asyncExample4()
+    asyncExample4()
 //    asyncExample5()
 
     /**lazy*/
