@@ -66,18 +66,20 @@ suspend fun launchExample2() = coroutineScope {
  * */
 
 suspend fun launchExample3() = coroutineScope {
-    launch {
+    val job1 = launch {
         for (i in 0..5) {
             delay(400L)
             println(i)
         }
     }
-    launch {
+    val job2 = launch {
         for (i in 6..10) {
             delay(400L)
             println(i)
         }
     }
+
+//    joinAll(job1, job2) // Принимает varags из job.
 
     println("Hello Coroutines")
 }
