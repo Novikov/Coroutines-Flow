@@ -3,10 +3,10 @@ package coroutines
 import kotlinx.coroutines.*
 
 suspend fun main() {
-//    coroutineScopeExample()
+    coroutineScopeExample()
 //    coroutineScopeExample2()
 //    coroutineScopeExample3()
-    coroutineScopeExample3_1()
+//    coroutineScopeExample3_1()
 //    coroutineScopeExample4()
 //    coroutineScopeExample5()
 //    coroutineScopeExample6()
