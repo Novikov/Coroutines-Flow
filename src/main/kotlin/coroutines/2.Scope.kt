@@ -38,6 +38,7 @@ suspend fun coroutineScopeExample() {
 
 /**У Global scope отсутствует job, а это значит что не будет формироваться иерархия если мы создадим семейство корутин на данном scope.
  * Время жизни данного scope соответствует времени жизни приложения. Его нужно избегать. Отменить его можно только вручную.
+ * Если отсутствует job то значит отсутствует механизм structured concurrency (отмены корутин и проброса исключений).
  * */
 suspend fun coroutineScopeExample2() {
     val jobInstance = GlobalScope.launch {
@@ -45,7 +46,16 @@ suspend fun coroutineScopeExample2() {
             println(i)
             delay(400L)
         }
+        throw Exception("ex")
     }.join()
+
+    val jobInstance2 = GlobalScope.launch {
+        for (i in 5..10) {
+            println(i)
+            delay(400L)
+        }
+    }.join()
+
     println("Hello Coroutines")
     println("${GlobalScope.coroutineContext[Job]} $jobInstance") // распечатать ссылку на job из текущего scope и parent корутины
 }
