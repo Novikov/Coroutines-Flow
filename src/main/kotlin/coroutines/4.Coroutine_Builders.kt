@@ -237,14 +237,3 @@ fun sumLazy(a: Int, b: Int): Int {
     return a + b
 }
 
-/** Полезная техника маппинга списка через async*/
-suspend fun asyncExample5() = coroutineScope {
-    val idList = listOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-    val dataList = idList.toMutableList().map { async { getDataById(it) } }.awaitAll()
-    println(dataList)
-}
-
-suspend fun getDataById(id: Int): String {
-    delay(100)
-    return "Data by id - $id"
-}
