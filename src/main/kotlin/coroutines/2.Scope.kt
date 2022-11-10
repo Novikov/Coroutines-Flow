@@ -1,6 +1,7 @@
 package coroutines
 
 import kotlinx.coroutines.*
+import kotlin.system.measureTimeMillis
 
 suspend fun main() {
     coroutineScopeExample()
@@ -41,23 +42,27 @@ suspend fun coroutineScopeExample() {
  * Если отсутствует job то значит отсутствует механизм structured concurrency (отмены корутин и проброса исключений).
  * */
 suspend fun coroutineScopeExample2() {
-    val jobInstance = GlobalScope.launch {
-        for (i in 0..5) {
-            println(i)
-            delay(400L)
-        }
-        throw Exception("ex")
-    }.join()
+    val measuredTime = measureTimeMillis {
+        val jobInstance = GlobalScope.launch {
+            for (i in 0..5) {
+                println(i)
+                delay(100L)
+            }
+            throw Exception("ex")
+        }.join()
 
-    val jobInstance2 = GlobalScope.launch {
-        for (i in 5..10) {
-            println(i)
-            delay(400L)
-        }
-    }.join()
+        val jobInstance2 = GlobalScope.launch {
+            for (i in 5..10) {
+                println(i)
+                delay(100L)
+            }
+        }.join()
 
-    println("Hello Coroutines")
-    println("${GlobalScope.coroutineContext[Job]} $jobInstance") // распечатать ссылку на job из текущего scope и parent корутины
+
+        println("Hello Coroutines")
+        println("${GlobalScope.coroutineContext[Job]} $jobInstance") // распечатать ссылку на job из текущего scope и parent корутины
+    }
+    println(measuredTime)
 }
 
 /**
