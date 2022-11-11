@@ -10,6 +10,7 @@ import kotlin.system.measureTimeMillis
 suspend fun main() {
     routineExample()
 //    coroutineExample()
+//    threadSwitchingExample()
 //    suspendExample()
 //    asynchExample()
 //    suspendApiCallExample()
@@ -77,6 +78,16 @@ suspend fun coroutine(number: Int, delay: Long) {
  * suspend обозначает что функция может приостановить свое выполнение и отдать control flow другой функции. После чего suspend может возобновить свое выполнение
  * и завершиться на другом потоке. Корутина выполняющая suspend функцию не привязана к конкретному потоку.
  * */
+
+suspend fun threadSwitchingExample() = coroutineScope {
+    println("method start work on thread ${Thread.currentThread().name}")
+    launch {
+        println("coroutine start work on thread ${Thread.currentThread().name}")
+        delay(5000)
+        println("coroutine end work on thread ${Thread.currentThread().name}")
+    }.join()
+    println("method end work on thread ${Thread.currentThread().name}")
+}
 
 /** Само по себе слово suspend не делает работу асинхронной. Функции будут засыпать на указанное время и выполняться последовательно*/
 suspend fun suspendExample() {
