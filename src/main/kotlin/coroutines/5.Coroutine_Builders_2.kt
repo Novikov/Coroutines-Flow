@@ -6,7 +6,8 @@ import kotlin.system.measureTimeMillis
 suspend fun main() {
 //    coroutineBuilders2Example1()
 //    coroutineBuilders2Example2()
-    coroutineBuilders2Example3()
+//    coroutineBuilders2Example3()
+    coroutineBuilders2Example4()
 }
 
 /** Полезная техника маппинга списка через async
@@ -50,12 +51,27 @@ suspend fun makeRequestByValue(id: Int) {
 suspend fun coroutineBuilders2Example3() = coroutineScope {
     val measuredTime = measureTimeMillis {
         val def1 = async(start = CoroutineStart.LAZY) { getDataById(1) }
-        val def2 = async(start = CoroutineStart.LAZY){ getDataById(2) }
-        val def3 = async(start = CoroutineStart.LAZY){ getDataById(3) }
+        val def2 = async(start = CoroutineStart.LAZY) { getDataById(2) }
+        val def3 = async(start = CoroutineStart.LAZY) { getDataById(3) }
 //        val def1 = async(start = CoroutineStart.LAZY) { getDataById(1) }.apply { start() }
 //        val def2 = async(start = CoroutineStart.LAZY) { getDataById(2) }.apply { start() }
 //        val def3 = async(start = CoroutineStart.LAZY) { getDataById(3) }.apply { start() }
         println("val1: ${def1.await()}, val2: ${def2.await()}, val3: ${def3.await()}")
     }
     println(measuredTime)
+}
+
+/** Coroutine dispatcher atomic похож на Default. Различие в том, что корутина с Atomic не может быть отменена до того как начнет свое выполнение*/
+@OptIn(ExperimentalCoroutinesApi::class)
+suspend fun coroutineBuilders2Example4() = coroutineScope {
+    val job1 = launch(start = CoroutineStart.ATOMIC) { bcgWork(500, "work 1") }
+    job1.cancel()
+    val job2 = launch(start = CoroutineStart.DEFAULT) { bcgWork(500, "work 2") }
+    job2.cancel()
+    delay(1000)
+}
+
+suspend fun bcgWork(workDuration: Long, text: String){
+    println(text)
+    delay(workDuration)
 }
