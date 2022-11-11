@@ -10,8 +10,8 @@ suspend fun main() {
 //    dispatcherExample1()
 //    dispatcherExample2()
 //    dispatcherExample3()
-//    dispatcherExample4()
-    dispatcherExample5()
+    dispatcherExample4()
+//    dispatcherExample5()
 }
 
 /**
@@ -52,8 +52,9 @@ suspend fun dispatcherExample2() = coroutineScope {
 
 /** Методы Dispatcher
  * 1)isDispatcherNeeded() - возвращает true если работа корутины должно быть выполнена с помощью dispatch метода. Все диспатчеры кроме unconfined
- * вернут true. Соответственно выполнение Unconfined диспатчера произойдет в этом же потоке.
- * 2)dispatch() - отвечает за выполнение переданного callback в другом потоке. Он вызовется самостоятельно корутиной
+ * вернут true.
+ * 2)dispatch() - отвечает за выполнение переданного callback в другом потоке. Он вызовется самостоятельно корутиной. Из-за вызова dispath() произойдет
+ * смена потока. Соответственно выполнение Unconfined диспатчера произойдет в этом же потоке.
  * */
 @OptIn(ExperimentalStdlibApi::class)
 suspend fun dispatcherExample3() = coroutineScope {
@@ -63,43 +64,28 @@ suspend fun dispatcherExample3() = coroutineScope {
 }
 
 /**
- * Unconfined dispatcher
- * При старте корутины происходит проверка isDispatcherNeeded. Для корутин с использованием других диспатчеров этот папраметр установлен в
- * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по ссылыке
- * DispatchedContinuation. В этом случае может произойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
- * вызова resume - поток на котором происходил запуск может быть занят и завершение проихойдет на другом потоке. В случае unconfined
- * завершение будет происходить на том потоке, на котором выполнялась работа.
+ * Unconfined (Неограниченный) dispatcher
+ * Работа корутины будет начата на потоке вызывающей функции, но только до первого suspend point.
+ * После suspend point работа корутины будет возобновлена в потоке, полностью определенным вызванной suspend функцией.
  * */
 
-@OptIn(ExperimentalStdlibApi::class)
 suspend fun dispatcherExample4() {
     val scope = CoroutineScope(Dispatchers.Unconfined)
+    println("start method thread ${Thread.currentThread().name}")
 
     scope.launch() {
-        println("${this.coroutineContext[CoroutineDispatcher]?.isDispatchNeeded(this.coroutineContext)}")
-        println("start coroutine ${Thread.currentThread().name}")
-        val data = getData3()
-        println("end coroutine ${Thread.currentThread().name}")
-    }
+        println("start coroutine thread ${Thread.currentThread().name}")
+        delay(3000)
+        println("end coroutine thread ${Thread.currentThread().name}")
+    }.join()
 
-    delay(3000)
+    println("end method thread ${Thread.currentThread().name}")
 }
-
-private suspend fun getData3(): String =
-    suspendCoroutine {
-        println("suspend coroutine start ${Thread.currentThread().name}")
-        thread {
-            println("background work ${Thread.currentThread().name}")
-            TimeUnit.MILLISECONDS.sleep(1000)
-            it.resume("Data")
-        }
-    }
-
 
 /** Можно создать диспатчер с помощью метода newSingleThreadContext().
  * Вся работа будет выполнена на новом потоке*/
 @OptIn(DelicateCoroutinesApi::class)
-suspend fun dispatcherExample5() = coroutineScope{
+suspend fun dispatcherExample5() = coroutineScope {
     println("method start ${Thread.currentThread().name}")
 
     launch(newSingleThreadContext("New thread")) {
