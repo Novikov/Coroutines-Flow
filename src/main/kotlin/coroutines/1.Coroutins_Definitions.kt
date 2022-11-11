@@ -8,9 +8,9 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.system.measureTimeMillis
 
 suspend fun main() {
-    routineExample()
+//    routineExample()
 //    coroutineExample()
-//    threadSwitchingExample()
+    threadSwitchingExample()
 //    suspendExample()
 //    asynchExample()
 //    suspendApiCallExample()
@@ -80,13 +80,12 @@ suspend fun coroutine(number: Int, delay: Long) {
  * */
 
 suspend fun threadSwitchingExample() = coroutineScope {
-    println("method start work on thread ${Thread.currentThread().name}")
-    launch {
-        println("coroutine start work on thread ${Thread.currentThread().name}")
-        delay(5000)
-        println("coroutine end work on thread ${Thread.currentThread().name}")
-    }.join()
-    println("method end work on thread ${Thread.currentThread().name}")
+    println("Hello from ${Thread.currentThread().name}")
+    withContext(Dispatchers.Default) {// Попробуй поменять на Unconfined
+        println("Hello from ${Thread.currentThread().name}")
+    }
+
+    println("Welcome back to ${Thread.currentThread().name}")
 }
 
 /** Само по себе слово suspend не делает работу асинхронной. Функции будут засыпать на указанное время и выполняться последовательно*/
