@@ -8,10 +8,9 @@ import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    checkThread()
-//    setDispatcher()
-    getDataOnUnconfinedDispatcherExample()
+    setDispatcher()
+//    getDataOnUnconfinedDispatcherExample()
 }
-
 
 /**
  * Очень важный момент касательно разделения потоков. Код внутри launch будет выполняться на собственном потоке, а код внутри coroutineScope
@@ -24,9 +23,7 @@ suspend fun checkThread() = coroutineScope {
     println("Функция checkThread выполняется на потоке: ${Thread.currentThread().name}")
 }
 
-/**
- * Мы сами можем задать диспатчер передав его в билдер
- * */
+/** Мы сами можем задать диспатчер передав его в билдер*/
 suspend fun setDispatcher() = coroutineScope {
     launch(Dispatchers.Default) {   // явным образом определяем диспетчер Dispatcher.Default
         println("Корутина выполняется на потоке: ${Thread.currentThread().name}")
@@ -47,7 +44,8 @@ suspend fun setDispatcher() = coroutineScope {
 /** Main dispatcher можно использовать для выполнения операций на главном потоке. Т.к suspend функции не блокируют поток то это не будет
  * тормозить UI.
  * Смены потока при завершении операции не будет т.к у Main диспатчера только один поток.
- * В идее Main диспатчер использовать не получится т.к это возможно только в андройде. Насколько я понимаю подключить зависимоть нельзя.
+ * Т.е мы запускаем операцию на главном потоке. Например, запрос в сеть. Функция приостановится, дожидаясь результата. В это время UI поток
+ * продолжит заниматься отрисовкой UI. После прихода результата - функция возобновляется и выполняет операции на главном потоке.
  * */
 
 
