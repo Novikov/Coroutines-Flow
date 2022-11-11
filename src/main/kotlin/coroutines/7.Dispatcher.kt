@@ -63,7 +63,7 @@ suspend fun setDispatcher() = coroutineScope {
 /** Методы Dispatcher
  * 1)isDispatcherNeeded() - возвращает true если работа корутины должно быть выполнена с помощью dispatch метода. Все диспатчеры кроме unconfined
  * вернут true. Соответственно выполнение Unconfined диспатчера произойдет в этом же потоке.
- * 2)dispatch() - отвечает за выполнение переданного callback в другом потоке. Он вызовется самостоятельно
+ * 2)dispatch() - отвечает за выполнение переданного callback в другом потоке. Он вызовется самостоятельно корутиной
  * */
 @OptIn(ExperimentalStdlibApi::class)
 suspend fun dispatcherExample3() = coroutineScope {
