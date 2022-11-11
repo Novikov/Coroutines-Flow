@@ -7,17 +7,17 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
-//    checkThread()
-//    setDispatcher()
-    dispatcherExample3()
-//    getDataOnUnconfinedDispatcherExample()
+//    dispatcherExample1()
+//    dispatcherExample2()
+//    dispatcherExample3()
+    dispatcherExample4()
 }
 
 /**
  * Очень важный момент касательно разделения потоков. Код внутри launch будет выполняться на собственном потоке, а код внутри coroutineScope
  * на отдельном.
  * */
-suspend fun checkThread() = coroutineScope {
+suspend fun dispatcherExample1() = coroutineScope {
     launch {
         println("Корутина выполняется на потоке: ${Thread.currentThread().name}")
     }
@@ -25,7 +25,7 @@ suspend fun checkThread() = coroutineScope {
 }
 
 /** Мы сами можем задать диспатчер передав его в билдер*/
-suspend fun setDispatcher() = coroutineScope {
+suspend fun dispatcherExample2() = coroutineScope {
     launch(Dispatchers.Default) {
         // явным образом определяем диспетчер Dispatcher.Default
         println("Корутина выполняется на потоке: ${Thread.currentThread().name}")
@@ -73,7 +73,7 @@ suspend fun dispatcherExample3() = coroutineScope {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-suspend fun getDataOnUnconfinedDispatcherExample() {
+suspend fun dispatcherExample4() {
     val scope = CoroutineScope(Dispatchers.Unconfined)
 
     scope.launch() {
