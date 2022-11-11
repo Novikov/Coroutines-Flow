@@ -59,7 +59,7 @@ suspend fun coroutineContextExample1() {
     delay(2000)
 }
 
-private fun contextToString(context: CoroutineContext): String =
+fun contextToString(context: CoroutineContext): String =
     "Job = ${context[Job]}, Dispatcher = ${context[ContinuationInterceptor]}"
 
 /**

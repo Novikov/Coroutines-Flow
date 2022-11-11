@@ -77,12 +77,17 @@ suspend fun bcgWork(workDuration: Long, text: String) {
     delay(workDuration)
 }
 
-/** Coroutine start unconfined немедленно выполняет корутину до первого suspend point так же как и корутина запущенная с Unconfined dispather,
- * но когда корутина возобновляет свое выполнение - она будет использовать coroutine dispatcher из своего контекста.
+/** Coroutine start unconfined немедленно выполняет корутину до первого suspend point так же как и корутина запущенная с Unconfined dispather, без переключения потока
  * Ниже пример не рабочий и определение так себе. Переписать после разбора Unconfined диспатчера*/
 suspend fun coroutineBuilders2Example5() = coroutineScope {
-    val job1 = launch(start = CoroutineStart.UNDISPATCHED) { bcgWork(500, "work on {${Thread.currentThread().name}}") }
+    println("method start work on thread ${Thread.currentThread().name}")
+    val job1 = launch(start = CoroutineStart.UNDISPATCHED) {
+        bcgWork(
+            500,
+            "coroutine works on {${Thread.currentThread().name}} with context: ${contextToString(coroutineContext)}"
+        )
+    }
     job1.join()
     delay(100)
-    println("End work on thread ${Thread.currentThread().name}")
+    println("method ends work on thread ${Thread.currentThread().name}")
 }
