@@ -4,7 +4,8 @@ import kotlinx.coroutines.*
 import kotlin.coroutines.*
 
 suspend fun main() {
-    coroutineContextExample1()
+//    coroutineContextExample1()
+    threadLocalExample()
 }
 
 suspend fun contextCreationExample() {
@@ -71,4 +72,22 @@ suspend fun withContextExample() {
     withContext(Dispatchers.Default) {
         // calculations
     }
+}
+
+/** ThreadLocal
+ * Штука из многопоточности. Можно привязать какие либо данные к конкретному потоку.
+ * Хз где это используется. Просто нужно знать что есть такое.
+ * */
+
+val threadLocal = ThreadLocal<String?>()
+fun threadLocalExample() = runBlocking<Unit> {
+    threadLocal.set("main")
+    println("Pre-main, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
+    val job = launch(Dispatchers.Default + threadLocal.asContextElement(value = "launch")) {
+        println("Launch start, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
+        yield()
+        println("After yield, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
+    }
+    job.join()
+    println("Post-main, current thread: ${Thread.currentThread()}, thread local value: '${threadLocal.get()}'")
 }
