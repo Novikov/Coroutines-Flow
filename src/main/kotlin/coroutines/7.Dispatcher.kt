@@ -7,10 +7,11 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
-    dispatcherExample1()
+//    dispatcherExample1()
 //    dispatcherExample2()
 //    dispatcherExample3()
-//    dispatcherExample4()
+    dispatcherExample4()
+//    dispatcherExample4_1()
 //    dispatcherExample5()
 }
 
@@ -66,20 +67,20 @@ suspend fun dispatcherExample3() = coroutineScope {
 /**
  * Unconfined (Неограниченный) dispatcher
  * Работа корутины будет начата на потоке вызывающей функции, но только до первого suspend point.
- * После suspend point работа корутины будет возобновлена в потоке, полностью определенным вызванной suspend функцией.
+ * После suspend point работа корутины будет возобновлена в потоке, полностью определенным вызванной suspend функцией (Там всегда будет DefaultExecutor)
  * */
 
-suspend fun dispatcherExample4() {
-    val scope = CoroutineScope(Dispatchers.Unconfined)
-    println("start method thread ${Thread.currentThread().name}")
-
-    scope.launch() {
-        println("start coroutine thread ${Thread.currentThread().name}")
-        delay(3000)
-        println("end coroutine thread ${Thread.currentThread().name}")
-    }.join()
-
-    println("end method thread ${Thread.currentThread().name}")
+suspend fun dispatcherExample4() = coroutineScope {
+    launch(Dispatchers.Unconfined) { // not confined -- will work with main thread
+        println("Unconfined      : I'm working in thread ${Thread.currentThread().name}")
+        delay(500)
+        println("Unconfined      : After delay in thread ${Thread.currentThread().name}")
+    }
+    launch { // context of the parent, main runBlocking coroutine
+        println("main runBlocking: I'm working in thread ${Thread.currentThread().name}")
+        delay(1000)
+        println("main runBlocking: After delay in thread ${Thread.currentThread().name}")
+    }
 }
 
 /** Можно создать диспатчер с помощью метода newSingleThreadContext().
