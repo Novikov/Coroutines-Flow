@@ -10,7 +10,8 @@ suspend fun main() {
 //    dispatcherExample1()
 //    dispatcherExample2()
 //    dispatcherExample3()
-    dispatcherExample4()
+//    dispatcherExample4()
+    dispatcherExample5()
 }
 
 /**
@@ -42,22 +43,11 @@ suspend fun dispatcherExample2() = coroutineScope {
  * Важный момеент - при завершении операции. Т.е когда придет ответ - корутина может сменить поток.
  */
 
-
 /** Main dispatcher можно использовать для выполнения операций на главном потоке. Т.к suspend функции не блокируют поток то это не будет
  * тормозить UI.
  * Смены потока при завершении операции не будет т.к у Main диспатчера только один поток.
  * Т.е мы запускаем операцию на главном потоке. Например, запрос в сеть. Функция приостановится, дожидаясь результата. В это время UI поток
  * продолжит заниматься отрисовкой UI. После прихода результата - функция возобновляется и выполняет операции на главном потоке.
- * */
-
-
-/**
- * Unconfined dispatcher
- * При старте корутины происходит проверка isDispatcherNeeded. Для корутин с использованием других диспатчеров этот папраметр установлен в
- * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по ссылыке
- * DispatchedContinuation. В этом случае может произойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
- * вызова resume - поток на котором происходил запуск может быть занят и завершение проихойдет на другом потоке. В случае unconfined
- * завершение будет происходить на том потоке, на котором выполнянась работа.
  * */
 
 /** Методы Dispatcher
@@ -71,6 +61,15 @@ suspend fun dispatcherExample3() = coroutineScope {
         println("${this.coroutineContext[CoroutineDispatcher]?.isDispatchNeeded(this.coroutineContext)}")
     }.join()
 }
+
+/**
+ * Unconfined dispatcher
+ * При старте корутины происходит проверка isDispatcherNeeded. Для корутин с использованием других диспатчеров этот папраметр установлен в
+ * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по ссылыке
+ * DispatchedContinuation. В этом случае может произойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
+ * вызова resume - поток на котором происходил запуск может быть занят и завершение проихойдет на другом потоке. В случае unconfined
+ * завершение будет происходить на том потоке, на котором выполнялась работа.
+ * */
 
 @OptIn(ExperimentalStdlibApi::class)
 suspend fun dispatcherExample4() {
@@ -95,4 +94,20 @@ private suspend fun getData3(): String =
             it.resume("Data")
         }
     }
+
+
+/** Можно создать диспатчер с помощью метода newSingleThreadContext().
+ * Вся работа будет выполнена на новом потоке*/
+@OptIn(DelicateCoroutinesApi::class)
+suspend fun dispatcherExample5() = coroutineScope{
+    println("method start ${Thread.currentThread().name}")
+
+    launch(newSingleThreadContext("New thread")) {
+        println("coroutine start ${Thread.currentThread().name}")
+        delay(300)
+        println("coroutine end ${Thread.currentThread().name}")
+    }.join()
+
+    println("method end ${Thread.currentThread().name}")
+}
 
