@@ -7,7 +7,8 @@ suspend fun main() {
 //    coroutineBuilders2Example1()
 //    coroutineBuilders2Example2()
 //    coroutineBuilders2Example3()
-    coroutineBuilders2Example4()
+//    coroutineBuilders2Example4()
+    coroutineBuilders2Example5()
 }
 
 /** Полезная техника маппинга списка через async
@@ -61,7 +62,7 @@ suspend fun coroutineBuilders2Example3() = coroutineScope {
     println(measuredTime)
 }
 
-/** Coroutine dispatcher atomic похож на Default. Различие в том, что корутина с Atomic не может быть отменена до того как начнет свое выполнение*/
+/** Coroutine start atomic похож на Default. Различие в том, что корутина с Atomic не может быть отменена до того как начнет свое выполнение*/
 @OptIn(ExperimentalCoroutinesApi::class)
 suspend fun coroutineBuilders2Example4() = coroutineScope {
     val job1 = launch(start = CoroutineStart.ATOMIC) { bcgWork(500, "work 1") }
@@ -71,7 +72,17 @@ suspend fun coroutineBuilders2Example4() = coroutineScope {
     delay(1000)
 }
 
-suspend fun bcgWork(workDuration: Long, text: String){
+suspend fun bcgWork(workDuration: Long, text: String) {
     println(text)
     delay(workDuration)
+}
+
+/** Coroutine start unconfined немедленно выполняет корутину до первого suspend point так же как и корутина запущенная с Unconfined dispather,
+ * но когда корутина возобновляет свое выполнение - она будет использовать coroutine dispatcher из своего контекста.
+ * Ниже пример не рабочий и определение так себе. Переписать после разбора Unconfined диспатчера*/
+suspend fun coroutineBuilders2Example5() = coroutineScope {
+    val job1 = launch(start = CoroutineStart.UNDISPATCHED) { bcgWork(500, "work on {${Thread.currentThread().name}}") }
+    job1.join()
+    delay(100)
+    println("End work on thread ${Thread.currentThread().name}")
 }
