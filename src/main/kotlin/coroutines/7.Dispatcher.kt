@@ -7,10 +7,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
-//    dispatcherExample1()
+    dispatcherExample1()
 //    dispatcherExample2()
 //    dispatcherExample3()
-    dispatcherExample4()
+//    dispatcherExample4()
 //    dispatcherExample5()
 }
 
