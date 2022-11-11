@@ -68,6 +68,7 @@ suspend fun dispatcherExample3() = coroutineScope {
  * Unconfined (Неограниченный) dispatcher
  * Работа корутины будет начата на потоке вызывающей функции, но только до первого suspend point.
  * После suspend point работа корутины будет возобновлена в потоке, полностью определенным вызванной suspend функцией (Там всегда будет DefaultExecutor)
+ * Этот default executor приходит из delay функции.
  * */
 
 suspend fun dispatcherExample4() = coroutineScope {
