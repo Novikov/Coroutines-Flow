@@ -84,6 +84,12 @@ suspend fun dispatcherExample4() = coroutineScope {
     }
 }
 
+/**
+ * The unconfined dispatcher is an advanced mechanism that can be helpful in certain corner cases where dispatching of a coroutine for its execution
+ * later is not needed or produces undesirable side-effects, because some operation in a coroutine must be performed right away.
+ * The unconfined dispatcher should not be used in general code.
+ * */
+
 /** Можно создать диспатчер с помощью метода newSingleThreadContext().
  * Вся работа будет выполнена на новом потоке*/
 @OptIn(DelicateCoroutinesApi::class)
