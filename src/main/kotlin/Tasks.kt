@@ -1,4 +1,3 @@
-
 /**
  * 0)Конспект по многопоточности, deadlock
  * 1)Working with shared state
@@ -9,4 +8,5 @@
  * 6)вызов корутин на разных скоуп. Пример Миши на runBlocking
  * 7)Стейт Машина
  * 8)Старт корутины на main
+ * 9)Unconfined dispatcher
  * */
