@@ -207,3 +207,8 @@ suspend fun coroutineScopeExample7() {
 
     println("Program has finished")
 }
+
+/** Еще один способ создания scope */
+suspend fun coroutineScopeExample8(){
+    val coroutineScope = MainScope()
+}
