@@ -8,7 +8,8 @@ import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    checkThread()
-    setDispatcher()
+//    setDispatcher()
+    dispatcherExample3()
 //    getDataOnUnconfinedDispatcherExample()
 }
 
@@ -25,7 +26,8 @@ suspend fun checkThread() = coroutineScope {
 
 /** Мы сами можем задать диспатчер передав его в билдер*/
 suspend fun setDispatcher() = coroutineScope {
-    launch(Dispatchers.Default) {   // явным образом определяем диспетчер Dispatcher.Default
+    launch(Dispatchers.Default) {
+        // явным образом определяем диспетчер Dispatcher.Default
         println("Корутина выполняется на потоке: ${Thread.currentThread().name}")
     }
     println("Функция main выполняется на потоке: ${Thread.currentThread().name}")
@@ -53,14 +55,29 @@ suspend fun setDispatcher() = coroutineScope {
  * Unconfined dispatcher
  * При старте корутины происходит проверка isDispatcherNeeded. Для корутин с использованием других диспатчеров этот папраметр установлен в
  * true. Для Unconfined dispatcher данная проверка false. Если isDispatched true то вызов continuation.resume() будет происходить по ссылыке
- * DispatchedContinuation. В этом случае может проихойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
+ * DispatchedContinuation. В этом случае может произойти смена потока т.к каждый Dispatcher использует разный пул ппотоков и в момент
  * вызова resume - поток на котором происходил запуск может быть занят и завершение проихойдет на другом потоке. В случае unconfined
  * завершение будет происходить на том потоке, на котором выполнянась работа.
  * */
+
+/** Методы Dispatcher
+ * 1)isDispatcherNeeded() - возвращает true если работа корутины должно быть выполнена с помощью dispatch метода. Все диспатчеры кроме unconfined
+ * вернут true. Соответственно выполнение Unconfined диспатчера произойдет в этом же потоке.
+ * 2)dispatch() - отвечает за выполнение переданного callback в другом потоке. Он вызовется самостоятельно
+ * */
+@OptIn(ExperimentalStdlibApi::class)
+suspend fun dispatcherExample3() = coroutineScope {
+    launch {
+        println("${this.coroutineContext[CoroutineDispatcher]?.isDispatchNeeded(this.coroutineContext)}")
+    }.join()
+}
+
+@OptIn(ExperimentalStdlibApi::class)
 suspend fun getDataOnUnconfinedDispatcherExample() {
     val scope = CoroutineScope(Dispatchers.Unconfined)
 
     scope.launch() {
+        println("${this.coroutineContext[CoroutineDispatcher]?.isDispatchNeeded(this.coroutineContext)}")
         println("start coroutine ${Thread.currentThread().name}")
         val data = getData3()
         println("end coroutine ${Thread.currentThread().name}")
