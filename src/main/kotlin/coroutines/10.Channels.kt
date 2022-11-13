@@ -6,12 +6,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 suspend fun main() {
-//    simpleChannel()
-//    closingChannelExample()
-    channelExample()
+    channelExample1()
+//    channelExample2()
+//    channelExample3()
 }
 
-suspend fun simpleChannel() = coroutineScope {
+/** Simple Channel*/
+suspend fun channelExample1() = coroutineScope {
     val channel = Channel<String>()
     launch {
         val users = listOf("Tom", "Bob", "Sam")
@@ -29,12 +30,13 @@ suspend fun simpleChannel() = coroutineScope {
 }
 
 /**
+ * Closing chanell
  * Чтобы указать, что в канале больше нет данных, его можно закрыть с помощью метода close().
  * Если для получения данных из канала применяется цикл for, то, получив сигнал о закрытии канала,
  * данный цикл получит все ранее посланные объекты до закрытия и завершит выполнение:
  * */
 
-suspend fun closingChannelExample() = coroutineScope {
+suspend fun channelExample2() = coroutineScope {
 
     val channel = Channel<String>()
     launch {
@@ -57,7 +59,7 @@ suspend fun closingChannelExample() = coroutineScope {
  * Канал - потокобезопасен и нам не надо самим возиться с блокировками и синхронностью.
  * */
 
-suspend fun channelExample() = coroutineScope {
+suspend fun channelExample3() = coroutineScope {
     val channel = Channel<Int>()
 
     launch {
