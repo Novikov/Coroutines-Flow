@@ -1,10 +1,6 @@
 package coroutines
 
 import kotlinx.coroutines.*
-import java.util.concurrent.TimeUnit
-import kotlin.concurrent.thread
-import kotlin.coroutines.resume
-import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
 //    dispatcherExample1()
