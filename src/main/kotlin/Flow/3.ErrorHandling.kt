@@ -3,13 +3,15 @@ package Flow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import java.io.IOException
+import java.lang.ArithmeticException
 
 suspend fun main() {
 //    handleErrorExample1()
 //    handleErrorExample2()
 //    handleErrorExample3()
-    handleErrorExample4()
+//    handleErrorExample4()
 //    handleErrorExample5()
+    handleErrorExample6()
 }
 
 suspend fun getErrorFlow(): Flow<String> {
@@ -107,11 +109,14 @@ suspend fun handleErrorExample5() {
 suspend fun handleErrorExample6() {
     getErrorFlow()
         .retry(2) {
-            if (it is IOException) {
+            //В данном блоке можно обработать Exception каким либо специфическим образом.
+            //Нужно вернуть boolean value по которому дальше будет происходить определение продолжать повтор (true) или пробросить исключения далее (false)
+            if (it is ArithmeticException) {
                 delay(5000)
                 true
+            } else {
+                false
             }
-            false
         }
         .collect {
             println(it)
