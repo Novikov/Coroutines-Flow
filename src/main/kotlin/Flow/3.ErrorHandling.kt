@@ -5,11 +5,11 @@ import kotlinx.coroutines.flow.*
 import java.io.IOException
 
 suspend fun main() {
-//    handleErrorExample1()
+    handleErrorExample1()
 //    handleErrorExample2()
 //    handleErrorExample3()
 //    handleErrorExample4()
-    handleErrorExample5()
+//    handleErrorExample5()
 }
 
 suspend fun getErrorFlow(): Flow<String> {
