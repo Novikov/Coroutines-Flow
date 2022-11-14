@@ -2,7 +2,6 @@ package Flow
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
-import java.io.IOException
 import java.lang.ArithmeticException
 
 suspend fun main() {
