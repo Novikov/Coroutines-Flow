@@ -2,6 +2,8 @@ package Flow
 
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.transform
 
 /**
@@ -16,7 +18,8 @@ import kotlinx.coroutines.flow.transform
  * */
 
 suspend fun main() {
-    flowOperatorsExample1()
+//    flowOperatorsExample1()
+    flowOperatorsExample2()
 }
 
 suspend fun performRequest(request: Int): String {
@@ -32,4 +35,21 @@ suspend fun flowOperatorsExample1() {
             emit(performRequest(request))
         }
         .collect { response -> println(response) }
+}
+
+/**Все операции flow выполняются последовательно (событие проходит либо до терминального оператора, либо фильтруется)
+ * Посмотри порядок вывода.
+ * */
+suspend fun flowOperatorsExample2(){
+    (1..5).asFlow()
+        .filter {
+            println("Filter $it")
+            it % 2 == 0
+        }
+        .map {
+            println("Map $it")
+            "string $it"
+        }.collect {
+            println("Collect $it")
+        }
 }
