@@ -6,12 +6,13 @@ import java.io.IOException
 import java.lang.ArithmeticException
 
 suspend fun main() {
-//    handleErrorExample1()
+    handleErrorExample1()
 //    handleErrorExample2()
 //    handleErrorExample3()
 //    handleErrorExample4()
 //    handleErrorExample5()
-    handleErrorExample6()
+//    handleErrorExample6()
+//    handleErrorExample7()
 }
 
 suspend fun getErrorFlow(): Flow<String> {
@@ -129,7 +130,9 @@ suspend fun handleErrorExample6() {
 suspend fun handleErrorExample7() {
     getErrorFlow()
         .retryWhen { cause, attempt ->
-            cause is IOException && attempt < 5
+            cause is ArithmeticException && attempt < 5
         }
-        .collect()
+        .collect {
+            println(it)
+        }
 }
