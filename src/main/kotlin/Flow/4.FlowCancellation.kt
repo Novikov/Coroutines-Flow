@@ -14,7 +14,6 @@ suspend fun main() {
 //    cancelFlowExample4()
 //    cancelFlowExample5()
 }
-
 suspend fun getSimpleFlow() = flow {
     emit(1)
     delay(500)
