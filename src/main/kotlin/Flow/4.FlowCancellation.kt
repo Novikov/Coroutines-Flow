@@ -1,17 +1,18 @@
 package Flow
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.NonCancellable.cancel
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.flow.onEach
 
 suspend fun main() {
-//    cancelFlowExample1()
+    cancelFlowExample1()
 //    cancelFlowExample2()
-    cancelFlowExample3()
+//    cancelFlowExample3()
+//    cancelFlowExample4()
+//    cancelFlowExample5()
 }
 
 suspend fun getSimpleFlow() = flow {
@@ -65,4 +66,19 @@ suspend fun cancelFlowExample3() = coroutineScope {
         }
         println(value)
     }
+}
+
+/** Есть способ порешать данную проблему с помощью операторов
+ * Корутина прервется, исключение хоть и печатается, но это ок.
+ * */
+suspend fun cancelFlowExample4() = coroutineScope {
+    (1..5).asFlow()
+//        .onEach { currentCoroutineContext().ensureActive() } //1 способ
+        .cancellable() //2 способ
+        .collect { value ->
+            if (value == 3) {
+                cancel()
+            }
+            println(value)
+        }
 }
