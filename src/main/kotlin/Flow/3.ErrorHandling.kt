@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.*
 import java.io.IOException
 
 suspend fun main() {
-    handleErrorExample1()
+//    handleErrorExample1()
 //    handleErrorExample2()
 //    handleErrorExample3()
-//    handleErrorExample4()
+    handleErrorExample4()
 //    handleErrorExample5()
 }
 
@@ -62,14 +62,27 @@ suspend fun handleErrorExample3() {
 
 /**
  * Catch срабатывает только для предшествующих ему операторов.
- * Можно добавить несколько операторов catch. Один будет ловить исключения из flow, другой из map, но из map у меня не отрабатывает. todo Понять почему
+ * Можно добавить несколько операторов catch. Один будет ловить исключения из flow, другой из map.
  * */
 
 suspend fun handleErrorExample4() {
     getErrorFlow()
-        .catch { println("Exception has been thrown") }
-        .map { it.toInt() }
-        .catch { println("Exception in map has been thrown") }
+        .catch {
+            println("Exception has been thrown")
+            emit("3")
+        }
+        .map {
+            if (it == "3") {
+                it.toInt() / 0
+            } else {
+                it
+            }
+
+        }
+        .catch {
+            println("Exception in map has been thrown")
+            emit(0)
+        }
         .collect {
             println(it)
         }
