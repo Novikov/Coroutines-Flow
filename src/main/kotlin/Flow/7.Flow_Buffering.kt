@@ -3,13 +3,15 @@ package Flow
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flow
 import kotlin.system.measureTimeMillis
 
 suspend fun main() {
 //    bufferingExample1()
-    bufferingExample2()
+//    bufferingExample2()
+    bufferingExample3()
 }
 
 suspend fun simpleBufferingFlow() = flow {
@@ -39,6 +41,20 @@ suspend fun bufferingExample2() = coroutineScope {
             .collect { value ->
                 delay(500)
                 println(value)
+            }
+    }
+    println("Collected in $time ms")
+}
+
+/** Еще один способ ускорить обработку. Каждый раз при долгой обработке будет происходить отмена flow и рестарт с последнего значения.
+ * Похоже что такое поведение будет всегда когда обработка длиться больше чем выпуск на 2-3 милисекунды*/
+suspend fun bufferingExample3() = coroutineScope {
+    val time = measureTimeMillis {
+        simpleBufferingFlow()
+            .collectLatest { value -> // cancel & restart on the latest value
+                println("Collecting $value")
+                delay(150) // pretend we are processing it for 300 ms
+                println("Done $value")
             }
     }
     println("Collected in $time ms")
