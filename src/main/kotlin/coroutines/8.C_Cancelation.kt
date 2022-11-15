@@ -5,14 +5,14 @@ import java.lang.Exception
 import kotlin.coroutines.suspendCoroutine
 
 suspend fun main() {
-//    cancellationExample1()
+    cancellationExample1()
 //    cancellationExample1_1()
 //    cancellationExample1_2()
 //    cancellationExample1_3()
 //    cancellationExample1_4()
 //    cancellationExample2()
 //    cancellationExample3()
-    cancellationExample3_1()
+//    cancellationExample3_1()
 }
 
 /**
