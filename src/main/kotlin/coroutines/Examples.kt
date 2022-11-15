@@ -7,7 +7,7 @@ suspend fun main() {
 //    example2()
 }
 
-suspend fun example1() = coroutineScope {
+suspend fun example1() = runBlocking {
     launch {
         println("start")
         launch { println("a") }
@@ -38,7 +38,7 @@ suspend fun example2() = runBlocking {
         println("First launch end")
     }
 
-    scope.launch {
+    launch {
         println("Second launch start")
         launch {
             println("2.1 inner launch start")
@@ -58,7 +58,7 @@ suspend fun example2() = runBlocking {
         println("Second launch end")
     }
 
-    scope.launch {
+    launch {
         println("Third launch start")
         launch {
             println("3.1 inner launch start")
