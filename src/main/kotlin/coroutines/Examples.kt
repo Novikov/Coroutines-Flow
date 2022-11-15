@@ -40,7 +40,7 @@ fun example2() = runBlocking {
 
 /** Непредсказуемый порядок*/
 fun example3() {
-    val scope = CoroutineScope(SupervisorJob())
+    val scope = CoroutineScope(Job())
     scope.launch {
         println("First launch start")
         launch {

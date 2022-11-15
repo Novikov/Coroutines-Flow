@@ -4,11 +4,11 @@ import kotlinx.coroutines.*
 import kotlin.system.measureTimeMillis
 
 suspend fun main() {
-//    coroutineBuilders2Example1()
+    coroutineBuilders2Example1()
 //    coroutineBuilders2Example2()
 //    coroutineBuilders2Example3()
 //    coroutineBuilders2Example4()
-    coroutineBuilders2Example5()
+//    coroutineBuilders2Example5()
 }
 
 /** Полезная техника маппинга списка через async
@@ -77,11 +77,12 @@ suspend fun bcgWork(workDuration: Long, text: String) {
     delay(workDuration)
 }
 
-/** Coroutine start unconfined немедленно выполняет корутину до первого suspend point так же как и корутина запущенная с Unconfined dispather, без переключения потока
- * Ниже пример не рабочий и определение так себе. Переписать после разбора Unconfined диспатчера*/
-suspend fun coroutineBuilders2Example5() = coroutineScope {
+/** Coroutine start unconfined немедленно выполняет корутину до первого suspend point так же как и корутина запущенная с Unconfined dispather,
+ * далее будет переключение потока. Смотри Unconfined диспатчер*/
+suspend fun coroutineBuilders2Example5(){
     println("method start work on thread ${Thread.currentThread().name}")
-    val job1 = launch(start = CoroutineStart.UNDISPATCHED) {
+    val scope = CoroutineScope(Job())
+    val job1 = scope.launch(start = CoroutineStart.UNDISPATCHED) {
         bcgWork(
             500,
             "coroutine works on {${Thread.currentThread().name}} with context: ${contextToString(coroutineContext)}"
