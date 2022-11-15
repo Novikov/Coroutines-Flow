@@ -7,9 +7,9 @@ import kotlin.coroutines.suspendCoroutine
 import kotlin.system.measureTimeMillis
 
 suspend fun main() {
-//    routineExample()
+    routineExample()
 //    coroutineExample()
-    threadSwitchingExample()
+//    threadSwitchingExample()
 //    suspendExample()
 //    asynchExample()
 //    suspendApiCallExample()
@@ -151,7 +151,7 @@ suspend fun getDataFromApi(): Int = suspendCoroutine {
 }
 
 /**
- * Корутины никак не блокируют друг друга. Обсудить последовательность вызовов.
+ * Корутины никак не блокируют друг друга.
  * */
 private fun blockingCoroutinesExample() {
     val scope = CoroutineScope(Job())
