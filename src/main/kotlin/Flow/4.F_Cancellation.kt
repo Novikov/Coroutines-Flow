@@ -1,11 +1,9 @@
 package Flow
 
 import kotlinx.coroutines.*
-import kotlinx.coroutines.NonCancellable.cancel
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.onEach
 
 suspend fun main() {
     cancelFlowExample1()
