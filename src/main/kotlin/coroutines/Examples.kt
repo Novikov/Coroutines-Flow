@@ -2,12 +2,17 @@ package coroutines
 
 import kotlinx.coroutines.*
 
-suspend fun main() {
-    example1()
+fun main() {
+//    example1()
+//    println("after example 1")
+
 //    example2()
+
+    example3()
 }
 
-suspend fun example1() = runBlocking {
+/** Блокирует поток выполнения*/
+ fun example1() = runBlocking {
     launch {
         println("start")
         launch { println("a") }
@@ -16,66 +21,53 @@ suspend fun example1() = runBlocking {
     }
 }
 
-suspend fun example2() = runBlocking {
+/** Предсказуемый порядок запуска. Сначала выполнение parent, затем child*/
+fun example2() = runBlocking {
+    launch {
+        println("start 1")
+        launch { println("1.1") }
+        launch { println("1.2") }
+        println("end 1")
+    }
+
+    launch {
+        println("start 2")
+        launch { println("2.1") }
+        launch { println("2.2") }
+        println("end 2")
+    }
+}
+
+/** Непредсказуемый порядок*/
+fun example3() {
     val scope = CoroutineScope(SupervisorJob())
     scope.launch {
         println("First launch start")
         launch {
             println("1.1 inner launch start")
-            delay(300)
-            println("1.1 inner launch end")
         }
         launch {
             println("1.2 inner launch start")
-            delay(300)
-            println("1.2 inner launch end")
         }
         launch {
             println("1.3 inner launch start")
-            delay(300)
-            println("1.3 inner launch end")
         }
         println("First launch end")
     }
 
-    launch {
+    scope.launch {
         println("Second launch start")
         launch {
             println("2.1 inner launch start")
-            delay(300)
-            println("2.1 inner launch end")
         }
         launch {
             println("2.2 inner launch start")
-            delay(300)
-            println("2.2 inner launch end")
         }
         launch {
             println("2.3 inner launch start")
-            delay(300)
-            println("2.3 inner launch end")
         }
         println("Second launch end")
     }
 
-    launch {
-        println("Third launch start")
-        launch {
-            println("3.1 inner launch start")
-            delay(300)
-            println("3.1 inner launch end")
-        }
-        launch {
-            println("3.2 inner launch start")
-            delay(300)
-            println("3.2 inner launch end")
-        }
-        launch {
-            println("3.3 inner launch start")
-            delay(300)
-            println("3.3 inner launch end")
-        }
-        println("Third launch end")
-    }
-    delay(5000)
+    Thread.sleep(5000)
 }
