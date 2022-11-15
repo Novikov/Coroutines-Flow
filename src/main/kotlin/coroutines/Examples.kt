@@ -7,14 +7,6 @@ suspend fun main() {
 //    example2()
 }
 
-/**
- * Если не вызывать join на дочерних корутинах то родительская ждать их не будет.
- * Но a напечатается быстрее end просто потому что launch отрабатывает быстрее чем родительская корутина.
- * Если туда добавить delay то родительская корутина отработает быстрее. Но нужно помнить, что если родительскаяа корутина отработала быстрее
- * это не значит что она отменена.
- *
- * Обсудить
- * */
 suspend fun example1() = coroutineScope {
     launch {
         println("start")
@@ -24,10 +16,7 @@ suspend fun example1() = coroutineScope {
     }
 }
 
-/**
- * Без использования join это все будет выполняться в разнобой. Корутины не блокируют друг друга.
- * */
-suspend fun example2() = coroutineScope {
+suspend fun example2() = runBlocking {
     val scope = CoroutineScope(SupervisorJob())
     scope.launch {
         println("First launch start")
@@ -88,5 +77,5 @@ suspend fun example2() = coroutineScope {
         }
         println("Third launch end")
     }
-    delay(3000)
+    delay(5000)
 }
