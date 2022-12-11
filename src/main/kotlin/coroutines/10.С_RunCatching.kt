@@ -10,3 +10,5 @@ fun main() {
 suspend fun runCatchingExample() {
 
 }
+
+// TODO: Выписать сюда примеры из socium т.к мне кажется там есть ошибки
